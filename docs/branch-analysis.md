@@ -1,5 +1,7 @@
 # Branchanalyse - Project 9
 
+**Synchronisatie na analyse:** de vijf ontbrekende commits uit `origin/main` zijn op 2026-10-02 zonder inhoudelijke mergeconflicten in lokale `main` samengevoegd. De lokale documentatiecommits zijn behouden. Na publicatie van de resulterende mergecommit is `main` gelijk aan `origin/main`.
+
 ## Actuele analyse na nieuwe merges — 2026-10-02
 
 Alle beschikbare lokale en remote branches zijn na `git fetch origin --prune` opnieuw gecontroleerd. De tabel beschrijft de situatie vóór deze documentatieupdate, ten opzichte van origin/main. Er is geen deployment of acceptatietest uitgevoerd.
@@ -10,7 +12,7 @@ Alle beschikbare lokale en remote branches zijn na `git fetch origin --prune` op
 | origin/configuratie | `8b2c699` | 8 / 0 | Alle commits zijn al opgenomen in origin/main; eigen branch is nog niet bijgewerkt. |
 | origin/infra | `a685fba` | 3 / 3 | Nieuwe merge van de oudere main op `aafa28b`; infra behoudt de afwijkende stack en bevat meegecommitte conflictmarkeringen. |
 | origin/security | `aafa28b` | 5 / 0 | Geen nieuwe securitycommit; eerder werk is al opgenomen in main. |
-| lokale main | `9dd307a` | 5 / 2 | Bevat de lokale documentatiecommits `de71073` en `9dd307a`; de nieuwste remote merge is nog niet lokaal samengevoegd. |
+| lokale main vóór synchronisatie | `9dd307a` | 5 / 2 | Bevatte de lokale documentatiecommits `de71073` en `9dd307a`; deze historische achterstand is inmiddels samengevoegd. |
 
 `origin/HEAD` is een verwijzing naar origin/main. Er zijn geen extra lokale werkbranches of remote branches aangetroffen.
 

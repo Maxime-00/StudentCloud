@@ -2,7 +2,7 @@
 
 Deze checklist is op 2026-10-02 afgestemd op de [officiële opdracht](https://github.com/MathieuLeroy2/network-experience-2627/blob/main/projecten/09-studentencloud.md). De 14 Must-bullets zijn voor opvolging opgesplitst in 18 eisen; daarnaast zijn er 5 Shoulds en 4 Coulds. Bestaande ID's M01–M12 blijven behouden. Zie ook de [projectplanning en scope](docs/project-plan.md).
 
-**Laatste branchanalyse:** 2026-10-02, na `git fetch origin --prune`. Zie [branchanalyse](docs/branch-analysis.md) voor commits, verschillen, mergeconflicten en onzekerheden. Referentie: `origin/main` op `8633f93`, `origin/infra` op `a685fba`. Lokale `main` op `9dd307a` loopt bij deze analyse 5 commits achter en 2 voor op origin/main; de lokale documentatie is nog niet gesynchroniseerd.
+**Laatste branchanalyse:** 2026-10-02, na `git fetch origin --prune`. Zie [branchanalyse](docs/branch-analysis.md) voor commits, verschillen, mergeconflicten en onzekerheden. De remote wijzigingen uit `origin/main` op `8633f93` zijn lokaal samengevoegd; na het pushen van deze documentatie is `main` volledig gesynchroniseerd.
 
 ## Legenda
 
@@ -84,7 +84,7 @@ Alle bewijsstukken hieronder met het label **verplicht** worden expliciet gevraa
 | Quotabeleid — verplicht | Applicatiespecialist + Security Engineer | [docs/policies.md](docs/policies.md) | 2 GB per student en 5 GB per groep voorgesteld; bijna-vol-waarschuwing en proef ontbreken (M06). |
 | Malwaremaatregelen — verplicht | Security Engineer | [docs/roles-security.md](docs/roles-security.md) en evidence/test-results/ | Blokkadebeleid en ClamAV-plan op main; werking niet getest (M09). |
 | Capaciteitsmeting — verplicht | Architect + Systeembeheerder | [infrastructure/network-storage.md](infrastructure/network-storage.md) | Origin/main combineert technische volumes en het 200 GB-quotamodel; infra-opslagdocumentatie bevat conflictmarkeringen. Storage-/resourceproef en meetresultaten ontbreken. |
-| Toegangsproeven — verplicht | Applicatiespecialist + Security Engineer | [docs/acceptance-tests.md](docs/acceptance-tests.md) en evidence/test-results/ | Scenario's op lokale main en configuratiebranch; account-/MFA-/quotaplannen nu ook op origin/main. Uitvoeringsresultaten ontbreken. |
+| Toegangsproeven — verplicht | Applicatiespecialist + Security Engineer | [docs/acceptance-tests.md](docs/acceptance-tests.md) en evidence/test-results/ | Scenario's en account-/MFA-/quotaplannen staan op main. Uitvoeringsresultaten ontbreken. |
 | Sync- en linktests — verplicht | Applicatiespecialist | [docs/acceptance-tests.md](docs/acceptance-tests.md) en evidence/test-results/ | Scenario's op main, maar geen uitgevoerde sync- of linktests; syncbewijs is expliciet gevraagd ondanks Should-prioriteit van S01. |
 | Restorebewijs — verplicht | Security Engineer + Systeembeheerder | [docs/backup-restore.md](docs/backup-restore.md) en evidence/test-results/ | Strategie en stappenplan aanwezig; bestanden én metadata/rechten nog naar testlocatie herstellen (M10). |
 | Onboarding/offboardingrunbooks — verplicht | Architect + Security Engineer | [docs/policies.md](docs/policies.md) | Offboardingconcept en accounttestplan aanwezig; onboarding, accountreview en uitgevoerde proeven ontbreken (M12). |
