@@ -1,6 +1,37 @@
 # Branchanalyse - Project 9
 
-## Nieuwe analyse — 2026-10-02
+## Actuele analyse na nieuwe merges — 2026-10-02
+
+Alle beschikbare lokale en remote branches zijn na `git fetch origin --prune` opnieuw gecontroleerd. De tabel beschrijft de situatie vóór deze documentatieupdate, ten opzichte van origin/main. Er is geen deployment of acceptatietest uitgevoerd.
+
+| Branch | Commit | Achter / voor origin/main | Bevinding |
+|---|---|---|---|
+| origin/main | `8633f93` | 0 / 0 | Nieuwe merge neemt de vier configuratiecommits over: toolvergelijking, Compose, installatieplan en account-/MFA-/quotatestplannen. |
+| origin/configuratie | `8b2c699` | 8 / 0 | Alle commits zijn al opgenomen in origin/main; eigen branch is nog niet bijgewerkt. |
+| origin/infra | `a685fba` | 3 / 3 | Nieuwe merge van de oudere main op `aafa28b`; infra behoudt de afwijkende stack en bevat meegecommitte conflictmarkeringen. |
+| origin/security | `aafa28b` | 5 / 0 | Geen nieuwe securitycommit; eerder werk is al opgenomen in main. |
+| lokale main | `9dd307a` | 5 / 2 | Bevat de lokale documentatiecommits `de71073` en `9dd307a`; de nieuwste remote merge is nog niet lokaal samengevoegd. |
+
+`origin/HEAD` is een verwijzing naar origin/main. Er zijn geen extra lokale werkbranches of remote branches aangetroffen.
+
+### Wijzigingen sinds de vorige controle
+
+- `8633f93` op origin/main voegt ten opzichte van de vorige main op `aafa28b` acht gewijzigde/toegevoegde bestanden toe: `docs/testing-auth-mfa.md`, `docs/testing-quotas-groupfolders.md`, `docs/tool-comparison.md`, `infrastructure/docker/.env.example`, `infrastructure/docker/.gitignore`, `infrastructure/docker/docker-compose.yml`, `infrastructure/install-notes.md` en `infrastructure/network-storage.md`.
+- `a685fba` op infra neemt de oudere security- en projectdocumentatie over uit main. Dit maakt de infra-stack nog niet gelijk aan de Compose op origin/main.
+- Een rechtstreekse `git grep` op alle remote branches vindt nog conflictmarkeringen in **origin/infra**: `README.md` (regel 56), `docs/tool-comparison.md` (regels 8, 26 en 52) en `infrastructure/network-storage.md` (regel 37). Deze markeringen staan daadwerkelijk in de commit en moeten worden afgewerkt vóór die documentatie wordt overgenomen.
+- Een verkennende `git merge-tree` voor origin/main en origin/infra toont bovendien conflicten in de toolvergelijking, opslagdocumentatie, `.env.example` en Compose. Er is bij deze controle geen branch samengevoegd.
+
+### Gevolgen voor requirements
+
+De status blijft **15 Bezig, 12 Todo, 0 Klaar, 0 Geblokkeerd**. Bij M01–M06, M08, M12, M14 en M15 zijn de bronverwijzingen bijgewerkt omdat relevant configuratiewerk nu ook op origin/main staat. Het installatie- en capaciteitsbewijs is bijgewerkt met de nieuwe locaties en de infra-conflicten.
+
+Op origin/main, configuratie, infra en security staan onder `evidence/` alleen `.gitkeep`-bestanden. TLS, monitoring, gebruikersgids, Shoulds en Coulds hebben geen nieuw uitvoeringsbewijs. De bestaande aandachtspunten blijven gelden: twee verschillende Compose-opzetten, onduidelijke bijna-vol-waarschuwing, verschillende MFA-regels en de combinatie van deactivatie met read-only genadetijd.
+
+De volgende secties zijn historische analyses. Hun branchafstanden en uitspraken over samenvoegingen gelden alleen voor de beschreven eerdere momentopname.
+
+---
+
+## Vorige analyse — 2026-10-02
 
 Basis: `git fetch origin --prune`, alle lokale en remote branches, `origin/main` op `aafa28b` en lokale `main` op `de71073`. De documentatiecommit `de71073` staat nog alleen lokaal. De afstanden hieronder zijn ten opzichte van **origin/main** vóór deze checklistupdate; de lokale documentatiecommit telt niet mee.
 
