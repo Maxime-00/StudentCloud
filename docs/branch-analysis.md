@@ -1,5 +1,33 @@
 # Branchanalyse - Project 9
 
+## Nieuwe analyse — 2026-10-02
+
+Basis: `git fetch origin --prune`, alle lokale en remote branches, `origin/main` op `aafa28b` en lokale `main` op `de71073`. De documentatiecommit `de71073` staat nog alleen lokaal. De afstanden hieronder zijn ten opzichte van **origin/main** vóór deze checklistupdate; de lokale documentatiecommit telt niet mee.
+
+| Branch | Achter / voor origin/main | Nieuwe commits | Inhoud en beoordeling |
+|---|---|---|---|
+| origin/main | 0 / 0 | `942f8e2`, `5f9aef7`, `aafa28b` (relevante security- en mergecommits) | Nextcloud-toolkeuze, conceptrollenmatrix, quota-/retentiebeleid, besmettingsbeleid en restoreplan op main. Geen uitgevoerde tests in `evidence/`. |
+| origin/security | 0 / 0 | Geen buiten origin/main | Is gelijk aan origin/main; securitydocumentatie is samengevoegd. |
+| origin/configuratie | 7 / 4 | `b7e5c7c`, `5aba00c`, `31a5f28`, `8b2c699` | Eigen toolvergelijking, Docker Compose en installatiehandleiding; testplannen voor accounts, MFA, quota en groepsmappen. Geen testresultaten. |
+| origin/infra | 7 / 4 | `b7e5c7c`, `5aba00c`, `63f006a`, `b51bd2f` | Productiegerichtere Compose-variant met MariaDB, Redis, cron en vaste datamap; geen bewijs van VM-installatie, TLS of poortscan. |
+| lokale main | 0 / 1 | `de71073` | Officiële opdracht verwerkt in checklist, README, acceptatietestplan en projectplanning. Deze commit is nog niet naar origin/main gepusht. |
+
+`origin/configuratie` en `origin/infra` hebben dezelfde eerste twee commits, maar verschillende latere wijzigingen. Beide verschillen van de security- en documentatiecommits op main. Een verkennende `git merge-tree` toont tekstconflicten met beide branches in `docs/tool-comparison.md` en `infrastructure/network-storage.md`; met infra ook in `README.md`. Er is nog niets gemerged.
+
+### Betekenis voor de checklist
+
+- **M01, M02–M06, M08–M10, M12–M17** staan op 🟨 Bezig voor ontwerp, beleid, Compose-bestanden of testvoorbereiding. Dit zijn 15 eisen. De overige 12 staan op ⬜ Todo. Geen eis is 🟩 Klaar: in alle onderzochte branches bevat `evidence/` alleen `.gitkeep`.
+- **M07 TLS** en **M11 monitoring** blijven Todo: de proxy/TLS en metingen staan alleen als afhankelijkheid of plan beschreven. De Docker-database heeft geen hostpoort, maar een externe scan voor M08 ontbreekt.
+- De configuratiebranch bindt de tijdelijke HTTP-poort als `${HTTP_PORT:-8080}:80` op de host; de infra-branch gebruikt eveneens `${HTTP_PORT:-8080}:80`. Dit is geen bewijs dat de app uitsluitend intern bereikbaar is. De uiteindelijke publicatieroute, firewall en proxy moeten nog worden gecontroleerd.
+- De Compose-varianten spreken elkaar tegen: configuratie gebruikt `nextcloud:latest`, `mariadb:11` en benoemde `nc-files`/`nc-config`-volumes zonder Redis/cron; infra gebruikt `nextcloud:35-apache`, `mariadb:11.8`, Redis/cron en `/srv/nextcloud-data/data`. Kies één reproduceerbare stack en pas installatie- en back-updocumentatie daarop aan.
+- Voor **M03/M13** vraagt de rollenmatrix MFA voor alle rollen, terwijl het configuratie-testplan MFA voor beheerders verplicht en andere accounts buiten die verplichting laat. Stem de beoogde regel af vóór implementatie.
+- Voor **M06** beschrijft het configuratie-testplan wel zichtbare opslagfeedback, maar zegt zelf dat automatische waarschuwing bij een instelbaar bijna-vol-percentage nog moet worden beslist. De Must-waarschuwing is dus niet aangetoond.
+- Voor **M12/M16** noemt het beleid onmiddellijke deactivatie gevolgd door 30 dagen read-only toegang. Bepaal hoe die read-only toegang werkt zonder het gedeactiveerde account te heractiveren.
+
+De volledige bewijs- en statuskoppeling staat in [PROJECT_CHECKLIST.md](../PROJECT_CHECKLIST.md). De rest van dit document hieronder is de eerdere momentopname en moet niet als actuele branchstand worden gelezen.
+
+---
+
 **Datum:** 2026-10-02. **Basis:** opgehaalde origin-branches na `git fetch origin --prune`.
 
 Deze historische analyse is gebaseerd op Git-inhoud, zonder deployment of acceptatietests uit te voeren. De opdrachttekst was tijdens die analyse nog niet beschikbaar; de checklist is daarna afgestemd op de officiële opdracht. Informatie over PR's was niet beschikbaar. De requirement-ID's verwijzen naar [PROJECT_CHECKLIST.md](../PROJECT_CHECKLIST.md). Onderstaande tabellen beschrijven de oorspronkelijke momentopname en zijn geen nieuwe analyse van implementatievoortgang.

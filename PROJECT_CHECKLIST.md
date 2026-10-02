@@ -2,7 +2,7 @@
 
 Deze checklist is op 2026-10-02 afgestemd op de [officiële opdracht](https://github.com/MathieuLeroy2/network-experience-2627/blob/main/projecten/09-studentencloud.md). De 14 Must-bullets zijn voor opvolging opgesplitst in 18 eisen; daarnaast zijn er 5 Shoulds en 4 Coulds. Bestaande ID's M01–M12 blijven behouden. Zie ook de [projectplanning en scope](docs/project-plan.md).
 
-**Laatste branchanalyse:** 2026-10-02. Zie [branchanalyse](docs/branch-analysis.md) voor commits, wijzigingen, achterstand en onzekerheden.
+**Laatste branchanalyse:** 2026-10-02, na `git fetch origin --prune`. Zie [branchanalyse](docs/branch-analysis.md) voor commits, verschillen, mergeconflicten en onzekerheden. De lokale `main` bevat ook de nog niet gepushte documentatiecommit `de71073`.
 
 ## Legenda
 
@@ -32,23 +32,23 @@ Een werkplan of documentatiesjabloon is geen bewijs van een werkende oplossing. 
 
 | ID | Eis | Eigenaar | Status | Branch/PR | Bewijs / acceptatie |
 |---|---|---|---|---|---|
-| M01 | Ondersteund open-source filesharingplatform | Applicatiespecialist | ⬜ Todo | - | [Toolvergelijking](docs/tool-comparison.md) invullen met kandidaten, licenties, onderhoud/support, criteria en gemotiveerde keuze; werkende installatie aantonen. |
-| M02 | Persoonlijke accounts | Applicatiespecialist | ⬜ Todo | - | Login-test met twee accounts; aantonen dat gebruikers elkaars persoonlijke bestanden niet kunnen openen. |
-| M03 | MFA voor beheerders waar beschikbaar | Applicatiespecialist | ⬜ Todo | - | Beschikbaarheid onderzoeken; waar beschikbaar MFA instellen en login met/zonder tweede factor testen; herstelprocedure vastleggen. Onbeschikbaarheid onderbouwen. |
-| M04 | Persoonlijke opslag | Applicatiespecialist | ⬜ Todo | - | Upload, download en verwijderen testen; persoonlijke opslag en toegangsisolatie aantonen. |
-| M05 | Groepsmappen met aantoonbare scheiding | Applicatiespecialist | ⬜ Todo | - | Groepsmap met leden en niet-leden testen; lees-/schrijfrechten en eigendom aantonen; verwijderd lid verliest toegang. |
-| M06 | Quota per gebruiker en/of groep met waarschuwing | Applicatiespecialist | ⬜ Todo | - | Quotabeleid en waarschuwingsdrempel vastleggen; waarschuwing bij bijna volle opslag testen; upload boven limiet wordt geweigerd zonder bestaande data te beschadigen. |
+| M01 | Ondersteund open-source filesharingplatform | Applicatiespecialist | 🟨 Bezig — keuze en compose | main · 5f9aef7; configuratie · b7e5c7c/5aba00c; infra · b51bd2f | Nextcloud is voorlopig gekozen en twee Compose-varianten zijn geschreven. Ondersteunde versie, eenduidige stack, installatie en werking op de VM nog verifiëren. |
+| M02 | Persoonlijke accounts | Applicatiespecialist | 🟨 Bezig — testplan | configuratie · 31a5f28/8b2c699 | Plan voor testaccounts en accountlevenscyclus staat in `docs/testing-quotas-groupfolders.md` en `docs/testing-auth-mfa.md` op configuratie. Uitgevoerde login- en isolatietest ontbreken. |
+| M03 | MFA voor beheerders waar beschikbaar | Applicatiespecialist | 🟨 Bezig — testplan | configuratie · 8b2c699; main · 5f9aef7 | TOTP, verplichte MFA en herstelcodes zijn beschreven; groepsindeling verschilt tussen documenten. Configuratie en loginbewijs ontbreken. |
+| M04 | Persoonlijke opslag | Applicatiespecialist | 🟨 Bezig — ontwerp en testplan | configuratie · 5aba00c/31a5f28; infra · b51bd2f | Beide Compose-varianten hebben persistente dataopslag; persoonlijke upload/download en isolatie zijn nog niet uitgevoerd. |
+| M05 | Groepsmappen met aantoonbare scheiding | Applicatiespecialist | 🟨 Bezig — testplan | configuratie · 31a5f28; main · 5f9aef7 | Group folders en rechten zijn als test beschreven. App-installatie, groepsrechten en proef met verwijderd lid ontbreken. |
+| M06 | Quota per gebruiker en/of groep met waarschuwing | Applicatiespecialist | 🟨 Bezig — beleid en testplan | main · 5f9aef7; configuratie · 31a5f28 | Beleid noemt 2 GB per student en 5 GB per groep; upload- en waarschuwingstests zijn gepland. Bijna-vol-waarschuwing is nog niet aantoonbaar geregeld; bestanden/data-integriteit niet getest. |
 | M07 | TLS via goedgekeurd publicatiepad | Systeembeheerder | ⬜ Todo | - | Publicatiepad afstemmen en vastleggen; HTTPS met geldig certificaat testen; HTTP-gedrag en certificaatvernieuwing documenteren. |
-| M08 | Geen publieke DB-/beheerpoort | Systeembeheerder | ⬜ Todo | - | [Netwerkconfiguratie](infrastructure/network-storage.md) invullen; poortscan vanaf extern testpunt en interne beheerroute aantonen. |
-| M09 | Maatregelen tegen gevaarlijke bestanden | Security Engineer | 🟨 Bezig — werkplan | security · d71f78f; geen PR vastgesteld | Blokkadebeleid en/of malwarecontrole kiezen en aantoonbaar testen. Bij scanner: koppeling, updates en veilige EICAR-test; bij blokkadebeleid: afgesproken verboden bestandstype testen. Werkplan is nog geen implementatie. |
-| M10 | Back-up + restore | Security Engineer + Systeembeheerder | 🟨 Bezig — werkplan | security · d71f78f; geen PR vastgesteld | [Back-up en herstel](docs/backup-restore.md) invullen voor bestanden, metadata/database en configuratie; restore uitvoeren en inhoud, rechten en metadata controleren. |
+| M08 | Geen publieke DB-/beheerpoort | Systeembeheerder | 🟨 Bezig — compose-ontwerp | configuratie · 5aba00c; infra · b51bd2f | MariaDB heeft in beide Compose-bestanden geen hostpoort. Externe poortscan en beheerpoortcontrole ontbreken; de tijdelijke HTTP-poort bindt nog op de host. |
+| M09 | Maatregelen tegen gevaarlijke bestanden | Security Engineer | 🟨 Bezig — beleid | main · 5f9aef7; security · aafa28b | Securityplan kiest blokkeren bij upload en beschrijft ClamAV-koppeling. Scanner is niet geïnstalleerd of getest; geen detectiebewijs. |
+| M10 | Back-up + restore | Security Engineer + Systeembeheerder | 🟨 Bezig — strategie | main · 5f9aef7; security · aafa28b | Back-upplan voor bestanden, database en configuratie is uitgewerkt. Geen draaiende back-up of restore naar testlocatie aangetoond; locatie verschilt tussen Compose-varianten. |
 | M11 | Monitoring | Architect + Systeembeheerder | ⬜ Todo | - | Bereikbaarheid, opslaggroei, fouten, database, certificaat en back-up monitoren; metingen en storingssignalering aantonen. Een capaciteitsdashboard met prognose valt onder S04. |
-| M12 | Onboarding, offboarding, accountreview en verwijderprocedure | Architect + Security Engineer | 🟨 Bezig — gedeeltelijk werkplan | security · d71f78f; geen PR vastgesteld | [Beleid](docs/policies.md) en runbooks invullen; accountaanmaak, roltoekenning, periodieke accountreview, intrekken van toegang en overdracht/verwijdering van data testen. Alleen offboarding is voorbereid. |
-| M13 | Vier gebruikersrollen en bijbehorende rechten | Security Engineer + Applicatiespecialist | ⬜ Todo | - | Rollenmatrix voor gebruiker, groepsbeheerder, supportoperator en platformbeheerder bevestigen, implementeren en per rol toegangsproeven uitvoeren. Concept in security · d71f78f; implementatie ontbreekt. |
-| M14 | Intern delen en tijdelijke externe links | Applicatiespecialist + Security Engineer | ⬜ Todo | - | Intern delen testen; externe link met wachtwoord en vervaldatum testen, inclusief verkeerd wachtwoord en verlopen link zonder toegang. |
-| M15 | Publieke externe links standaard uit of strikt begrensd | Security Engineer + Applicatiespecialist | ⬜ Todo | - | Scope en standaardinstellingen vastleggen; aantonen dat publieke links uitstaan of uitsluitend binnen afgesproken beperkingen werken. |
-| M16 | Versie- of prullenbakbeleid met duidelijke retentie | Security Engineer + Applicatiespecialist | ⬜ Todo | - | [Privacy- en retentiebeleid](docs/policies.md) vastleggen, configureren en herstel/bewaartermijn testen. Conceptwaarden op security zijn nog niet bevestigd. |
-| M17 | Veilige uploadlimieten | Applicatiespecialist + Security Engineer | ⬜ Todo | - | Uploadlimieten onderbouwen vanuit doelgroep en resources; onder/boven de limiet testen met gecontroleerde afwijzing. Afstemmen met quota (M06) en bestandsbeleid (M09). |
+| M12 | Onboarding, offboarding, accountreview en verwijderprocedure | Architect + Security Engineer | 🟨 Bezig — gedeeltelijk beleid | main · 5f9aef7; configuratie · 8b2c699 | Offboarding- en accounttestplannen bestaan. Onboarding, accountreview, eenduidige deactivatie/genadetijd en uitgevoerde verwijdertest ontbreken. |
+| M13 | Vier gebruikersrollen en bijbehorende rechten | Security Engineer + Applicatiespecialist | 🟨 Bezig — conceptmatrix | main · 5f9aef7; configuratie · 8b2c699 | Vier rollen en rechten zijn beschreven. Matrix is nog niet op Nextcloud getoetst; MFA-regels spreken elkaar tegen; toegangsproeven ontbreken. |
+| M14 | Intern delen en tijdelijke externe links | Applicatiespecialist + Security Engineer | 🟨 Bezig — beleidsontwerp | main · 5f9aef7; configuratie · b7e5c7c | Interne en externe deelmogelijkheden staan in rollenmatrix/toolvergelijking. Wachtwoord, vervaldatum en verlopen-linktest zijn niet geconfigureerd of bewezen. |
+| M15 | Publieke externe links standaard uit of strikt begrensd | Security Engineer + Applicatiespecialist | 🟨 Bezig — beleidsontwerp | main · 5f9aef7; configuratie · b7e5c7c | Beleid noemt wachtwoord op externe links; standaardinstelling of begrenzing van publieke links en testbewijs ontbreken. |
+| M16 | Versie- of prullenbakbeleid met duidelijke retentie | Security Engineer + Applicatiespecialist | 🟨 Bezig — beleidsconcept | main · 5f9aef7; security · aafa28b | Concept: 30 dagen prullenbak en maximaal 10 versies. Afstemming met 30 dagen genadetijd, werkende configuratie en retentietest ontbreken. |
+| M17 | Veilige uploadlimieten | Applicatiespecialist + Security Engineer | 🟨 Bezig — configuratievoorstel | infra · b51bd2f; configuratie · 5aba00c | Infra-Compose heeft uploadinstellingen van 2 GB; configuratiebranch noemt proxygrens als nog in te vullen. Definitieve limiet, afstemming en afwijzingstest ontbreken. |
 | M18 | Gebruikersgids | Applicatiespecialist + Architect | ⬜ Todo | - | Gids voor synchronisatie, delen, quota en herstel opleveren en met een representatieve gebruiker doorlopen; beperkingen en supportroute vermelden. |
 
 ## Should
@@ -76,18 +76,18 @@ Alle bewijsstukken hieronder met het label **verplicht** worden expliciet gevraa
 
 | Opleverstuk | Eigenaar | Locatie | Huidige stand |
 |---|---|---|---|
-| Toolvergelijking — verplicht | Applicatiespecialist | [docs/tool-comparison.md](docs/tool-comparison.md) | Sjabloon; keuze en support onderbouwen (M01). |
+| Toolvergelijking — verplicht | Applicatiespecialist | [docs/tool-comparison.md](docs/tool-comparison.md) | Nextcloud voorlopig gekozen op main; configuratie bevat een tweede, afwijkende vergelijking. Versie/support en keuze nog reviewen (M01). |
 | Dataflow- en storagediagram — verplicht | Architect | [docs/architecture.md](docs/architecture.md) | Sjabloon; beide diagrammen maken. |
-| Installatie en beheer | Systeembeheerder | [infrastructure/install-notes.md](infrastructure/install-notes.md) | Sjabloon; reproduceerbare installatie beschrijven. |
-| Rollenmatrix — verplicht | Security Engineer + Applicatiespecialist | [docs/roles-security.md](docs/roles-security.md) | Sjabloon op main; concept in security · d71f78f; bevestigen en implementeren (M13). |
-| Privacy- en retentieanalyse — verplicht | Security Engineer | [docs/policies.md](docs/policies.md) | Sjabloon op main; concept in security. Dataclassificatie, privacyrisico's en bewaartermijnen uitwerken (M16). |
-| Quotabeleid — verplicht | Applicatiespecialist + Security Engineer | [docs/policies.md](docs/policies.md) | Limieten, motivatie en waarschuwingen vastleggen (M06). |
-| Malwaremaatregelen — verplicht | Security Engineer | [docs/roles-security.md](docs/roles-security.md) en evidence/test-results/ | Beleid en werking aantonen (M09). |
+| Installatie en beheer | Systeembeheerder | [infrastructure/install-notes.md](infrastructure/install-notes.md) | Op configuratie staat een installatieplan met `NOG INVULLEN`; twee uiteenlopende Compose-varianten wachten op afstemming. Geen draaiende installatie aangetoond. |
+| Rollenmatrix — verplicht | Security Engineer + Applicatiespecialist | [docs/roles-security.md](docs/roles-security.md) | Concept op main met vier rollen; uitvoerbaarheid, MFA-regels en toegangsproeven nog controleren (M13). |
+| Privacy- en retentieanalyse — verplicht | Security Engineer | [docs/policies.md](docs/policies.md) | Concept met retentiewaarden op main; dataclassificatie, risicoanalyse en eenduidige offboarding nog afwerken (M16). |
+| Quotabeleid — verplicht | Applicatiespecialist + Security Engineer | [docs/policies.md](docs/policies.md) | 2 GB per student en 5 GB per groep voorgesteld; bijna-vol-waarschuwing en proef ontbreken (M06). |
+| Malwaremaatregelen — verplicht | Security Engineer | [docs/roles-security.md](docs/roles-security.md) en evidence/test-results/ | Blokkadebeleid en ClamAV-plan op main; werking niet getest (M09). |
 | Capaciteitsmeting — verplicht | Architect + Systeembeheerder | [infrastructure/network-storage.md](infrastructure/network-storage.md) | Storage-/resourceproef en meetresultaten ontbreken; advies onderbouwen. Ook nodig zonder S04-dashboard. |
-| Toegangsproeven — verplicht | Applicatiespecialist + Security Engineer | [docs/acceptance-tests.md](docs/acceptance-tests.md) en evidence/test-results/ | Persoonlijke/groepsopslag, rollen en intrekken van toegang testen. |
-| Sync- en linktests — verplicht | Applicatiespecialist | [docs/acceptance-tests.md](docs/acceptance-tests.md) en evidence/test-results/ | Linktests en syncconflictproef uitvoeren; syncbewijs is expliciet gevraagd ondanks Should-prioriteit van S01. |
-| Restorebewijs — verplicht | Security Engineer + Systeembeheerder | [docs/backup-restore.md](docs/backup-restore.md) en evidence/test-results/ | Bestanden én metadata/rechten naar testlocatie herstellen (M10). |
-| Onboarding/offboardingrunbooks — verplicht | Architect + Security Engineer | [docs/policies.md](docs/policies.md) | Uitvoerbare procedures en testresultaten ontbreken (M12). |
+| Toegangsproeven — verplicht | Applicatiespecialist + Security Engineer | [docs/acceptance-tests.md](docs/acceptance-tests.md) en evidence/test-results/ | Scenario's op main en configuratiebranch; uitvoeringsresultaten ontbreken. |
+| Sync- en linktests — verplicht | Applicatiespecialist | [docs/acceptance-tests.md](docs/acceptance-tests.md) en evidence/test-results/ | Scenario's op main, maar geen uitgevoerde sync- of linktests; syncbewijs is expliciet gevraagd ondanks Should-prioriteit van S01. |
+| Restorebewijs — verplicht | Security Engineer + Systeembeheerder | [docs/backup-restore.md](docs/backup-restore.md) en evidence/test-results/ | Strategie en stappenplan aanwezig; bestanden én metadata/rechten nog naar testlocatie herstellen (M10). |
+| Onboarding/offboardingrunbooks — verplicht | Architect + Security Engineer | [docs/policies.md](docs/policies.md) | Offboardingconcept en accounttestplan aanwezig; onboarding, accountreview en uitgevoerde proeven ontbreken (M12). |
 | Acceptatietestplan | Alle eigenaren; Architect coördineert review | [docs/acceptance-tests.md](docs/acceptance-tests.md) | Plan aanwezig; alle uitvoeringsresultaten nog Todo. |
 | Screenshots en testresultaten | Eigenaar van de eis | [evidence/screenshots/](evidence/screenshots/), [evidence/test-results/](evidence/test-results/) | Alleen .gitkeep; nog geen bewijs. |
 
@@ -99,4 +99,4 @@ Alle bewijsstukken hieronder met het label **verplicht** worden expliciet gevraa
 4. Laat de eigenaar en een reviewer de koppeling en testbewijzen controleren. Markeer een eis pas als 🟩 Klaar na geslaagde acceptatie en gecontroleerd bewijs.
 5. Werk na controle de checklist op main bij met de juiste branch/PR en bewijslinks. Registreer een blokkade met oorzaak en volgende actie.
 
-**Huidige telling:** 24 Todo, 3 Bezig (voorbereiding), 0 Klaar, 0 Geblokkeerd. Deze telling betreft de 27 requirement-ID's, niet de bewijsstukken of mijlpalen. De branchanalyse is een momentopname; nieuwe commits en tests vereisen een nieuwe beoordeling.
+**Huidige telling:** 12 Todo, 15 Bezig (ontwerp/testvoorbereiding), 0 Klaar, 0 Geblokkeerd. Deze telling betreft de 27 requirement-ID's, niet de bewijsstukken of mijlpalen. Er is nog geen uitgevoerde acceptatietest in `evidence/`; nieuwe commits en tests vereisen een nieuwe beoordeling.
