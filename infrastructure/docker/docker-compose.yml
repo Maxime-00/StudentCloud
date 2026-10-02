@@ -1,0 +1,104 @@
+# DOEL: reproduceerbare interne Nextcloud-installatie via Docker.
+#
+# BELANGRIJK (scope / VM):
+#   - Publieke toegang + TLS wordt NÓG NIET hier geconfigureerd.
+#     De reverse proxy (Nginx/Traefik) en het certificaat worden door
+#     "persoon 1" op de VM voorbereid. Tot die tijd luistert Nextcloud
+#     alleen intern (testpoort) zodat we de installatie kunnen verifiëren.
+#   - De database is opzettelijk NIET naar de host gepubliceerd; ze is
+#     alleen bereikbaar binnen het interne netwerk `nc-internal`.
+#
+# VM-specifieke waarden (OS, hostname, poorten, IP) staan in `install-notes.md`
+# en komen uit het gesprek met persoon 1 — daar zijn ze nu gemarkeerd als
+# "NOG INVULEN". De echte geheime/lokaal-waarden gaan in een lokaal `.env`
+# (zie `.env.example`), dat niet naar de repo gaat.
+
+services:
+  # Database (MariaDB). Bewaart metadata: gebruikers, mappen, delen, versies.
+  # Bewaart NIET de bestanden zelf (die liggen in `nc-files`).
+  # Geen exposed ports dus niet publiek bereikbaar.
+  db:
+    image: mariadb:11
+    container_name: nc-db
+    restart: unless-stopped
+    environment:
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${DB_NAME:-nextcloud}
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - nc-internal
+    # Bewuste keuze: géén `ports:` sectie. De DB is alleen intern bereikbaar.
+
+  # Nextcloud (webinterface, bestanden, gebruikersbeheer).
+  app:
+    # TODO: versie vastpinnen (bijv. nextcloud:31) zodra de exacte ondersteunde
+    #       versie in install-notes.md is geverifieerd. "latest" is tijdelijk.
+    image: nextcloud:latest
+    container_name: nc-app
+    restart: unless-stopped
+    ports:
+      # TIJDELIJKE TESTPOORT — alleen voor het verifiëren van de installatie
+      # op de VM. VERTREKKEN zodra persoon 1 de reverse proxy + TLS heeft
+      # ingezet; dan wordt deze poort niet meer naar de host gepubliceerd.
+      # NOG INVULEN: kies een poort die vrij is op de VM (bijv. 8080).
+      - "${HTTP_PORT:-8080}:80"
+    environment:
+      # Verwijzing naar de DB (container-naam via intern netwerk).
+      MYSQL_HOST: db
+      MYSQL_DATABASE: ${DB_NAME:-nextcloud}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      # --- Alleen relevant achter de reverse proxy van persoon 1 ---
+      # TRUSTED_PROXIES: IP/omgeving van de reverse proxy (NOG INVULEN door P1)
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
+      # Nadat TLS via de reverse proxy actief is:
+      OVERWRITEPROTOCOL: ${OVERWRITEPROTOCOL:-http}
+      # OVERWRITEHOST / OVERWRITESECCONFIG: instellen op de echte domein/hostname
+      # zodra P1 de publicatie klaar is (NOG INVULEN).
+    volumes:
+      # Persistente opslag: bestanden, config en (via data) uploads.
+      - nc-files:/var/www/html/data
+      - nc-config:/var/www/html/config
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - nc-internal
+
+  # ---------------------------------------------------------------------------
+  # Reverse proxy (Nginx/Traefik) — BEHEERD DOOR PERSOON 1.
+  # ---------------------------------------------------------------------------
+  # Opzet, TLS-certificaat en hostname worden door persoon 1 voorbereid op de
+  # VM. In deze branch houden we die bewust buiten de compose zodat we niet
+  # conflicteren met P1's omgeving.
+  #
+  # Wanneer P1 de proxy klaar heeft:
+  #   1) deze `app`-poort (8080:80) verwijderen;
+  #   2) `app` alleen via het interne netwerk door de proxy bereiken;
+  #   3) TRUSTED_PROXIES, OVERWRITEPROTOCOL=https en OVERWRITEHOST invullen.
+  #
+  # Voorbeeld (Nginx, illustratief — definitie bij persoon 1):
+  #   proxy_pass http://nc-app:80;
+  #   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  #   proxy_set_header X-Forwarded-Proto https;
+  #   proxy_set_header Host $host;
+  #   # uploadlimiet (NOG INVULEN: maximaal toegestane uploadgrootte)
+  #   client_max_body_size 2G;
+
+volumes:
+  db-data:     # database (metadata: gebruikers, bestanden, delen, versies)
+  nc-files:    # de bestanden zelf (persistente opslag op de VM)
+  nc-config:   # Nextcloud configuratie (config.php)
+
+networks:
+  nc-internal:
+    driver: bridge
