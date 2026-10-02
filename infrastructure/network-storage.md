@@ -1,108 +1,138 @@
 # Netwerk en opslag
 
-Dit document dekt het interne netwerk en de opslag van de Studentencloud
-(Nextcloud via Docker). De container-definities staan in
-`infrastructure/docker/docker-compose.yml`.
+Dit document beschrijft het interne netwerk en de opslag van de Studentencloud.
+Nextcloud draait met Docker Compose op VM `studentencloud`. De servicedefinities
+staan in [`docker/docker-compose.yml`](docker/docker-compose.yml).
 
-> Status: **testomgeving voor deze branch.** Adressen, poorten en de
-> reverse-proxy/TLS-publicatie hangen af van de VM en van persoon 1 en zijn
-> gemarkeerd als **`NOG INVULEN`**.
+## Huidige omgeving
+
+| Onderdeel | Waarde |
+|---|---|
+| VM | `studentencloud` |
+| Besturingssysteem | Ubuntu Server 24.04 |
+| IP-adres | `10.20.254.141` |
+| Tijdelijke Nextcloud-testpoort | `8080` |
+| Dataschijf | 200 GB, gemount op `/srv/nextcloud-data` |
+| Uitvoering | Docker Compose |
+
+Nextcloud is tijdens het testen bereikbaar via
+`http://10.20.254.141:8080`. De definitieve reverse-proxy- en TLS-configuratie
+moet nog worden vastgelegd.
 
 ## Netwerkconfiguratie
 
 ### Interne opbouw
-- Docker-netwerk `nc-internal` (bridge): verbindt `nc-app` (Nextcloud) en
-  `nc-db` (MariaDB) zonder dat ze publiek bereikbaar zijn.
-- De database heeft **geen** exposed port; alleen `nc-app` luistert — en in de
-  testfase alleen op de interne testpoort (`${HTTP_PORT}`, standaard 8080).
-- Publieke publicatie + TLS loopt via de **reverse proxy van persoon 1**
-  (Nginx/Traefik). Die staat bewust buiten deze compose.
 
-| Verbinding | Van | Naar | Poort | Toegankelijkheid |
-|-----------|-----|------|-------|------------------|
-| DB | `nc-app` | `nc-db` | 3306 | alleen `nc-internal` |
-| App (test) | host | `nc-app` | `${HTTP_PORT}:80` | intern, tijdelijk |
-| App (productie) | reverse proxy (P1) | `nc-app` | 80 | via proxy + TLS — `NOG INVULEN` |
+Docker Compose maakt het bridge-netwerk `nc-internal` aan. Daarop draaien:
 
-### Adressen / poorten — `NOG INVULEN`
-| Vraag | Waarde |
-|-------|--------|
-| IP / subnet van de VM | `NOG INVULEN` |
-| Hostname (productie, via P1) | `NOG INVULEN` |
-| Testpoort (tijdelijk) | `NOG INVULEN` (standaard 8080) |
-| Proxy-poorten (productie) | `NOG INVULEN door P1` |
+- `nc-app`: de Nextcloud-webapplicatie;
+- `nc-cron`: voert de periodieke Nextcloud-taken uit;
+- `nc-db`: MariaDB voor metadata;
+- `nc-redis`: Redis voor caching en locking.
+
+Alleen `nc-app` publiceert een hostpoort:
+
+```yaml
+ports:
+  - "${HTTP_PORT:-8080}:80"
+```
+
+MariaDB en Redis hebben geen `ports`-configuratie en zijn daardoor niet direct
+via de VM-host of het externe netwerk bereikbaar. Nextcloud benadert ze via de
+interne servicenamen `db` en `redis`.
+
+| Verbinding | Van | Naar | Poort | Bereikbaarheid |
+|---|---|---|---|---|
+| Nextcloud-testverkeer | client | `10.20.254.141` | `8080` | intern testnetwerk |
+| Nextcloud naar MariaDB | `nc-app` | `nc-db` | `3306` | alleen `nc-internal` |
+| Nextcloud naar Redis | `nc-app` | `nc-redis` | `6379` | alleen `nc-internal` |
+| Cron naar Nextcloud-data | `nc-cron` | gedeelde volumes | niet van toepassing | alleen op de Docker-host |
+
+Voor productie hoort een reverse proxy TLS af te handelen. MariaDB, Redis en
+beheerpoorten blijven daarbij intern en worden niet gepubliceerd.
 
 ## Opslag
 
-De opslag wordt op twee niveaus beschreven: (1) de **technische volumes** die
-de installatie op de VM gebruikt, en (2) het **logische capaciteits- en
-quotamodel** dat de 200 GB verdeelt over studenten, groepen en reserves.
+De opslag bestaat uit technische Docker-volumes en de afzonderlijke 200 GB
+dataschijf. De systeemschijf van 32 GB bevat Ubuntu en is geen datacache.
 
-### Technische volumes (implementatie)
+### Fysieke dataschijf
 
-Persistente volumes (gedefinieerd in `docker-compose.yml`):
+De partitie `/dev/sdb1` is als ext4 geformatteerd en permanent gemount op:
 
-| Volume | Inhoud | Bewaart |
-|--------|--------|--------|
-| `nc-files` | `/var/www/html/data` | de **bestanden** zelf, uploads, versies |
-| `nc-config` | `/var/www/html/config` | Nextcloud-configuratie (`config.php`) |
-| `db-data` | `/var/lib/mysql` | **metadata**: gebruikers, mappen, delen, versies |
+```text
+/srv/nextcloud-data
+```
 
-- Volumes blijven na `docker compose down` bestaan (alleen `-v` wist ze).
-- De opslag ligt persistent op de VM.
+Docker Compose bind-mount de map `/srv/nextcloud-data/data` in zowel `nc-app`
+als `nc-cron` op `/var/www/html/data`. Daardoor staan de gebruikersbestanden,
+uploads, versies en prullenbakdata op de 200 GB-schijf.
 
-### Logisch capaciteitsmodel
+### Technische volumes
 
-De Studentencloud gebruikt twee afzonderlijke opslagcomponenten met verschillende capaciteiten en doelen:
+| Opslag | Containerpad | Inhoud | Implementatie |
+|---|---|---|---|
+| `/srv/nextcloud-data/data` | `/var/www/html/data` | Gebruikersbestanden, versies en prullenbak | Bind mount op de 200 GB-schijf |
+| `nc-html` | `/var/www/html` | Nextcloud-installatie en configuratie | Docker named volume |
+| `db-data` | `/var/lib/mysql` | MariaDB-metadata, accounts en shares | Docker named volume |
 
-| Opslagcomponent | Capaciteit | Bestemming |
-| --- | --- | --- |
-| Cloudopslag | 200 GB | Centrale opslag van studentgegevens, bestanden en backups in de cloud |
-| Lokaal/gecacheerd geheugen | 32 GB | Snel bereikbaar werkgeheugen/cache op de lokale node voor actieve sessies en tussenopslag |
+`nc-html` wordt gedeeld door de app- en croncontainers. Named volumes blijven
+bestaan na `docker compose down`, maar worden verwijderd wanneer bewust
+`docker compose down -v` wordt uitgevoerd. De bind mount op de dataschijf valt
+niet onder die `-v`-verwijdering.
 
-De 200 GB cloudopslag vormt de persistente bron van waarheid. De 32 GB is niet bedoeld als permanente opslag, maar ondersteunt de prestaties en beschikbaarheid van actieve gebruikers.
+## Logisch capaciteits- en quotamodel
 
-#### Verdeling van de 200 GB over groepen
+Het quotamodel reserveert de totale capaciteit bewust niet volledig voor
+gebruikers. Zo blijft er ruimte voor versies, prullenbakdata, beheer en groei.
 
-Verdeling uitgegaan van circa 50 studenten, minder dan 10 projectgroepen en
-gebruik dat soms grotere datasets betreft. Het model houdt bewust ruimte (reserves +
-buffer) vrij zodat het platform niet tegen de limiet loopt en groeigruimte heeft.
+| Gebruik | Quota-eenheid | Aantal | Subtotaal | Aandeel |
+|---|---|---:|---:|---:|
+| Individuele studenten | 2 GB per gebruiker | 50 | 100 GB | 50% |
+| Projectgroepen | 5 GB per groep | 8 | 40 GB | 20% |
+| Systeem- en platformreserve¹ | — | — | 20 GB | 10% |
+| Beheer en archief² | — | — | 10 GB | 5% |
+| Buffer en groeireserve³ | — | — | 30 GB | 15% |
+| **Totaal** | | | **200 GB** | **100%** |
 
-| Groep / gebruik | Quota-eenheid | Aantal | Subtotaal | Aandeel |
-|---|---|---|---|---|
-| Individuele studenten | 2 GB per gebruiker | 50 | 100 GB | 50 % |
-| Projectgroepen (gedeeld) | 5 GB per groep | 8 | 40 GB | 20 % |
-| Systeem- & platformreserves¹ | — | — | 20 GB | 10 % |
-| Beheer / archief² | — | — | 10 GB | 5 % |
-| Buffer / groeireserve³ | — | — | 30 GB | 15 % |
-| **Totaal** | | | **200 GB** | **100 %** |
+1. Metadata, versiehistorie, scanbuffers en logging.
+2. Back-ups van metadata, tijdelijke offboarding-bewaring en exports.
+3. Ruimte voor piekgebruik, grotere datasets en toekomstige groei.
 
-¹ Metadata, versiehistorie, ClamAV-scanbuffers en logging.
-² Metadata-backup, offboarding-bewaring en exports door de Platformbeheerder.
-³ Onverdeeld, voor piekgebruik, grotere datasets en groei; wordt geleidelijk als
-  extra individueel of groepsquota uitgekeerd zodra er behoefte is.
+### Beheerrichtlijnen
 
-#### Handreikingen
-
-- **Standaard individueel quota:** 2 GB per student. Dit is ook de suggested waarde
-  voor de quota-limiet **X** van de Supportoperator in `docs/roles-security.md`.
-- **Groepsquota:** 5 GB per projectgroep; de Groepsbeheerder verdeelt het intern.
-- **Boven de standaard:** grotere datasets (bv. onderzoeksdata) krijgen tijdelijk extra
-  ruimte uit de buffer — de Platformbeheerder keert dit uit, de Supportoperator blijft
-  binnen limiet **X**.
-- **Monitor:** Supportoperator houdt gebruik per groep bij; als een categorie >80 % van
-  z'n subtotaal benadert, verschuift ruimte uit de buffer.
-
-> Aanpasbaar: verleg GB tussen de rijen als het aantal studenten of groepen verandert,
-> en behoud de som op 200 GB.
+- Het standaard individuele quota is 2 GB per student.
+- Het standaard groepsquota is 5 GB per projectgroep via Group folders.
+- Tijdelijke uitbreidingen komen uit de groeireserve en worden door de
+  platformbeheerder toegekend.
+- De supportoperator controleert het gebruik. Bij 80% gebruik van een categorie
+  wordt beoordeeld of ruimte uit de buffer moet worden toegewezen.
+- Als aantallen studenten of groepen wijzigen, moet de verdeling opnieuw worden
+  berekend terwijl het totaal maximaal 200 GB blijft.
 
 ## Controle
 
-- **Netwerk (test):** `nc-app` bereikt `nc-db` via de container-naam; van de
-  host is de DB **niet** direct bereikbaar (geen exposed port).
-- **Netwerk (productie):** na proxy-wissel verifiëren dat alleen de proxy
-  publiek bereikbaar is, en dat DB/beheerpoorten gesloten zijn.
-- **Opslag (persistentie):** testbestand uploaden, `docker compose restart`,
-  bestand moet nog aanwezig zijn (bewijst `nc-files`).
-- **Opslag (restore):** zie `docs/backup-restore.md` — geselecteerde bestanden
-  én metadata naar een testlocatie herstellen.
+### Netwerk
+
+```bash
+docker compose ps
+docker compose exec app getent hosts db redis
+```
+
+- Controleer dat Nextcloud op `10.20.254.141:8080` bereikbaar is.
+- Controleer dat `nc-app` de interne namen `db` en `redis` kan vinden.
+- Controleer dat poorten 3306 en 6379 niet op de VM-host zijn gepubliceerd.
+- Controleer bij productie dat alleen de reverse proxy extern bereikbaar is.
+
+### Opslag
+
+```bash
+findmnt /srv/nextcloud-data
+df -h /srv/nextcloud-data
+```
+
+- Upload een testbestand en herstart de containers met
+  `docker compose restart`; het bestand moet aanwezig blijven.
+- Herstart de VM en controleer dat `/srv/nextcloud-data` automatisch mount.
+- Voer een hersteltest uit voor gebruikersdata, MariaDB en configuratie zoals
+  beschreven in [`../docs/backup-restore.md`](../docs/backup-restore.md).

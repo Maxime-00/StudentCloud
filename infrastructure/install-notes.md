@@ -1,132 +1,271 @@
 # Installatienotities
 
-Dit document volgt de installatie van de **Studentencloud** (Nextcloud via
-Docker) op de VM. De onderliggende bestanden staan in `infrastructure/docker/`:
+Dit document beschrijft de installatie van de **Studentencloud** op de VM
+`studentencloud`. Nextcloud en de ondersteunende services draaien met Docker
+Compose. De containerconfiguratie staat in `infrastructure/docker/`:
 
-- `docker-compose.yml` — beschrijft de containers en hun samenwerking;
-- `.env.example` — sjabloon voor configuratiewaarden en geheimen;
-- `.env` — lokaal bestand met de echte waarden (wordt niet ge-commit).
+- `docker-compose.yml` beschrijft de containers, volumes en hun samenwerking;
+- `.env.example` is het sjabloon voor configuratiewaarden en geheimen;
+- `.env` bevat de echte lokale waarden en wordt niet gecommit.
 
-> Status: **testomgeving voor deze branch.** De productie-publicatie
-> (reverse proxy + TLS) wordt door **persoon 1** op de VM voorbereid. Alles
-> dat afhangt van de VM is hier gemarkeerd als **`NOG INVULEN`**.
+> **Status:** testomgeving op Ubuntu Server 24.04. Nextcloud is tijdelijk
+> rechtstreeks bereikbaar via poort 8080. De definitieve publicatie via een
+> reverse proxy en TLS moet nog worden ingericht.
 
-## Architecture (conceptueel)
+## Huidige infrastructuur
 
-| Component | Rol |
-|-----------|-----|
-| Gebruiker | Browser of desktopclient |
-| Reverse proxy (Nginx/Traefik) | Publicatie + TLS — **beheerd door persoon 1** |
-| Nextcloud-container | Webinterface, bestanden en gebruikersbeheer |
-| Database (MariaDB) | Metadata: gebruikers, mappen, delen, versies |
-| Bestandsopslag | Persistente opslag van de bestanden zelf op de VM |
+| Onderdeel | Huidige waarde |
+|---|---|
+| VM | `studentencloud` |
+| Besturingssysteem | Ubuntu Server 24.04 |
+| IP-adres | `10.20.254.141` |
+| Orchestratie | Docker Compose v2 |
+| Nextcloud | `nextcloud:35-apache` |
+| Database | `mariadb:11.8` |
+| Cache en file locking | `redis:7-alpine` |
+| Achtergrondtaken | aparte `nc-cron`-container |
+| Tijdelijke test-URL | `http://10.20.254.141:8080` |
+| Dataschijf | 200 GB, gemount op `/srv/nextcloud-data` |
+| Nextcloud-datamap | `/srv/nextcloud-data/data` |
 
-De database bewaart de *metadata*, de bestandsopslag bewaart de *bestanden*.
-De database is opzettelijk **niet publiek bereikbaar** (geen exposed port,
-alleen binnen het interne Docker-netwerk `nc-internal`).
+## Architectuur
 
+| Component | Container | Rol | Extern gepubliceerd |
+|---|---|---|---|
+| Nextcloud | `nc-app` | Webinterface, bestanden en gebruikersbeheer | Ja, tijdelijk op poort 8080 |
+| MariaDB | `nc-db` | Metadata voor gebruikers, mappen, shares en versies | Nee |
+| Redis | `nc-redis` | Caching en transactionele file locking | Nee |
+| Cron | `nc-cron` | Periodieke Nextcloud-achtergrondtaken | Nee |
+
+MariaDB en Redis zijn bewust alleen bereikbaar via het interne Docker-netwerk
+`nc-internal`. Alleen de Nextcloud-app publiceert tijdelijk een hostpoort.
+
+```text
+Gebruiker
+   |
+   | http://10.20.254.141:8080
+   v
+Nextcloud (nc-app) ----> MariaDB (nc-db, intern)
+       |--------------> Redis (nc-redis, intern)
+       |
+       +--------------> /srv/nextcloud-data/data
+
+Cron (nc-cron) --------> gedeelde Nextcloud-installatie en datamap
 ```
-Gebruiker -> Reverse proxy (P1, TLS) -> Nextcloud (intern) -> MariaDB (intern)
-                                                       -> nc-files (volume)
-```
+
+In productie hoort de gegevensstroom via een reverse proxy met TLS te lopen.
+De database-, Redis- en beheerpoorten blijven daarbij intern.
 
 ## Vereisten
 
-### Hardware / VM — `NOG INVULEN`
-| Vraag | Antwoord |
-|-------|----------|
-| Besturingssysteem op de VM | `NOG INVULEN` (bijv. Ubuntu 22.04/24.04 LTS) |
-| Is Docker al geïnstalleerd? | `NOG INVULEN` (ja/nee + versie) |
-| Is Docker Compose (v2) beschikbaar? | `NOG INVULEN` |
-| Hostname van de VM | `NOG INVULEN` |
-| Vrij IP / subnet (intern) | `NOG INVULEN` |
-| Verwachte opslaggrootte | `NOG INVULEN` (zie `docs/` capaciteitsadvies) |
+### VM en opslag
 
-### Software
-- Docker Engine + Docker Compose (v2) op de VM.
-- MariaDB 11 (via de `mariadb:11`-image) en de officiële
-  [`nextcloud`](https://hub.docker.com/_/nextcloud)-image.
-- Referentie: [Nextcloud installatiedocs](https://docs.nextcloud.com/server/latest/admin_manual/installation/).
+- Ubuntu Server 24.04 op VM `studentencloud`;
+- intern IP-adres `10.20.254.141`;
+- Docker Engine en Docker Compose v2;
+- een ext4-datapartitie van 200 GB, automatisch gemount op
+  `/srv/nextcloud-data`;
+- voldoende vrije ruimte op de systeemschijf voor images, containers, logs en
+  de named volumes.
 
-### Accounts / rollen
-Zie `docs/roles-security.md`. Voor de installatie is minimaal één
-**platformbeheerder**-account nodig (het eerste beheeraccount).
+Controleer de mount voordat containers worden gestart:
+
+```bash
+findmnt /srv/nextcloud-data
+df -h /srv/nextcloud-data
+sudo mkdir -p /srv/nextcloud-data/data
+```
+
+De mount moet ook na een herstart beschikbaar zijn. De permanente koppeling
+staat in `/etc/fstab`; zie ook `infrastructure/network-storage.md`.
+
+### Software-images
+
+- Nextcloud 35 met Apache via `nextcloud:35-apache`;
+- MariaDB 11.8 via `mariadb:11.8`;
+- Redis via `redis:7-alpine`;
+- dezelfde Nextcloud 35-image voor de croncontainer.
+
+### Accounts en rollen
+
+Voor de installatie is minimaal één platformbeheerder nodig. De verdere
+rollen en rechten staan in `docs/roles-security.md`.
 
 ## Installatiestappen
 
-> Werk in `infrastructure/docker/`. Waar een stap afhangt van de VM of van
-> persoon 1, staat **`NOG INVULEN`** / **`afwacht P1`**.
+Voer de volgende stappen uit vanaf de repository op de VM.
 
-1. **Info opvragen bij persoon 1** (`NOG INVULEN`)
-   - Welk besturingssysteem staat op de VM?
-   - Is Docker al geïnstalleerd?
-   - Welke hostname/poorten zijn voorzien voor de reverse proxy en TLS?
-   - Wat is het interne IP/subnet van de VM?
+### 1. Configuratiebestand maken
 
-2. **Configuratiemap inrichten**
-   De map bestaat al: `infrastructure/docker/` (dit is de "studentencloud"-map
-   in deze repo). Bevat `docker-compose.yml`, `.env.example` en `.gitignore`.
+```bash
+cd infrastructure/docker
+cp .env.example .env
+```
 
-3. **Lokaal `.env` maken en vullen**
-   ```powershell
-   cd infrastructure\docker
-   copy .env.example .env
-   ```
-   - Sterke wachtwoorden genereren voor `DB_PASSWORD` en `DB_ROOT_PASSWORD`:
-     ```powershell
-     openssl rand -base64 24
-     ```
-   - `HTTP_PORT` instellen op een vrij poortnummer op de VM (`NOG INVULEN`).
-   - De `TRUSTED_PROXIES` / `OVERWRITE*`-waarden blijven leeg tot P1 de proxy
-     heeft ingezet.
+Vul in `.env` minimaal sterke, unieke waarden in voor:
 
-4. **Persistente volumes controleren**
-   De compose definieert al de volumes:
-   - `db-data` → database (metadata);
-   - `nc-files` → de bestanden zelf;
-   - `nc-config` → Nextcloud-configuratie (`config.php`).
-   Deze volumes blijven bestaan na een `docker compose down` (geen `-v`),
-   dus data gaat niet verloren bij herstart.
+- `DB_PASSWORD`;
+- `DB_ROOT_PASSWORD`;
+- `NEXTCLOUD_ADMIN_PASSWORD`.
 
-5. **Containers starten en logs controleren**
-   ```powershell
-   docker compose up -d
-   docker compose ps
-   docker compose logs -f db
-   docker compose logs -f app
-   ```
-   - De `db`-healthcheck moet `healthy` worden voordat `app` start.
-   - Let in de `app`-logs op succesvolle DB-connectie.
+Een willekeurig wachtwoord kan bijvoorbeeld zo worden gegenereerd:
 
-6. **Webinterface openen en eerste beheeraccount aanmaken**
-   - Open de testpoort: `http://<VM-IP>:<HTTP_PORT>` (`NOG INVULEN`).
-   - Volg de instelassistent en maak het eerste
-     **platformbeheerder**-account aan.
-   - Controleer in de admin: database verbonden, versie zichtbaar.
+```bash
+openssl rand -base64 24
+```
 
-7. **Persistenties-toets (bestandsbehoud na herstart)**
-   ```powershell
-   # upload een testbestand via de webinterface, dan:
+De huidige niet-geheime instellingen zijn:
+
+```dotenv
+HTTP_PORT=8080
+DB_NAME=nextcloud
+DB_USER=nextcloud
+NEXTCLOUD_ADMIN_USER=ncadmin
+NEXTCLOUD_TRUSTED_DOMAINS="10.20.254.141 studentencloud"
+PHP_UPLOAD_LIMIT=2G
+APACHE_BODY_LIMIT=2147483648
+```
+
+Commit `.env` nooit. Alleen `.env.example` hoort in Git.
+
+### 2. Compose-configuratie valideren
+
+```bash
+docker compose config
+```
+
+Controleer vóór het starten dat:
+
+- alleen `app` een `ports`-regel heeft;
+- de standaard testpoort `8080:80` is;
+- MariaDB en Redis geen hostpoorten publiceren;
+- `/srv/nextcloud-data/data` aan `/var/www/html/data` is gekoppeld;
+- zowel `app` als `cron` de datamap en het volume `nc-html` gebruiken.
+
+### 3. Persistente opslag controleren
+
+Docker Compose gebruikt:
+
+| Opslag | Containerpad | Inhoud |
+|---|---|---|
+| `/srv/nextcloud-data/data` | `/var/www/html/data` | Gebruikersbestanden, versies en prullenbak |
+| `nc-html` | `/var/www/html` | Nextcloud-installatie en configuratie |
+| `db-data` | `/var/lib/mysql` | MariaDB-metadata |
+
+De gebruikersdata staat via een bind mount op de 200 GB-schijf. `nc-html` en
+`db-data` zijn Docker named volumes. Ze blijven behouden na
+`docker compose down`, maar niet wanneer bewust `docker compose down -v` wordt
+uitgevoerd.
+
+### 4. Containers starten
+
+```bash
+docker compose up -d
+docker compose ps
+```
+
+De MariaDB- en Redis-healthchecks moeten gezond worden. `nc-app` wacht via
+`depends_on` op beide services. Controleer zo nodig de logs:
+
+```bash
+docker compose logs db
+docker compose logs redis
+docker compose logs app
+docker compose logs cron
+```
+
+### 5. Nextcloud openen
+
+Open in het interne netwerk:
+
+```text
+http://10.20.254.141:8080
+```
+
+Meld aan met `NEXTCLOUD_ADMIN_USER` en het lokaal ingestelde
+`NEXTCLOUD_ADMIN_PASSWORD`. Controleer in het beheeroverzicht:
+
+- dat Nextcloud 35 actief is;
+- dat MariaDB verbonden is;
+- dat Redis voor caching en locking wordt gebruikt;
+- dat achtergrondtaken op cron staan;
+- dat de datamap naar `/var/www/html/data` wijst.
+
+### 6. Achtergrondtaken controleren
+
+De container `nc-cron` gebruikt dezelfde Nextcloud-installatie en datamap als
+`nc-app` en voert `/cron.sh` uit.
+
+```bash
+docker compose ps cron
+docker compose logs cron
+```
+
+Controleer in Nextcloud bij de basisinstellingen dat **Cron** als methode voor
+achtergrondtaken is geselecteerd.
+
+### 7. Persistentie testen
+
+1. Upload via Nextcloud een herkenbaar testbestand.
+2. Herstart de containers:
+
+   ```bash
    docker compose restart
    ```
-   Het testbestand moet na de herstart nog aanwezig zijn. Dat bewijst dat
-   `nc-files` persistent is.
 
-8. **Publicatie (afwacht P1)** — `NOG INVULEN`
-   - Nadat persoon 1 de reverse proxy + TLS heeft ingezet:
-     - tijdelijke testpoort `8080:80` uit `docker-compose.yml` verwijderen;
-     - `TRUSTED_PROXIES`, `OVERWRITEPROTOCOL=https` en `OVERWRITEHOST` in `.env`
-       vullen;
-     - `docker compose up -d` opnieuw draaien;
-     - verifiëren dat de DB en beheerpoorten **niet** publiek bereikbaar zijn.
+3. Controleer dat het bestand nog aanwezig en leesbaar is.
+4. Controleer dat de data daadwerkelijk op de dataschijf staat:
+
+   ```bash
+   sudo du -sh /srv/nextcloud-data/data
+   ```
+
+Hiermee worden zowel de bind mount als de herstartbestendigheid getest.
+
+### 8. Productiepublicatie voorbereiden
+
+De huidige poort 8080 is alleen bedoeld voor intern testen. Voor productie:
+
+- plaats Nextcloud achter een reverse proxy met HTTPS;
+- configureer de trusted proxy en overwrite-instellingen van Nextcloud;
+- sluit de rechtstreekse testpoort zodra de proxy is gevalideerd;
+- publiceer MariaDB-poort 3306 en Redis-poort 6379 nooit;
+- test de externe URL, certificaatketen en uploadlimieten.
+
+Deze stap vereist een afzonderlijke, gecontroleerde wijziging aan de
+Compose- en proxyconfiguratie.
+
+## Verificatie
+
+```bash
+docker compose ps
+docker compose exec app php occ status
+docker compose exec app php occ config:system:get version
+findmnt /srv/nextcloud-data
+df -h /srv/nextcloud-data
+```
+
+Verwacht resultaat:
+
+- `nc-app`, `nc-db`, `nc-redis` en `nc-cron` draaien;
+- MariaDB en Redis rapporteren een gezonde status;
+- Nextcloud rapporteert versie 35;
+- `/srv/nextcloud-data` is gemount vanaf de 200 GB-dataschijf;
+- Nextcloud is intern bereikbaar op `10.20.254.141:8080`.
 
 ## Problemen oplossen
 
-Verzamel hier bekende problemen en mogelijke oplossingen.
-
 | Symptoom | Mogelijke oorzaak | Oplossing |
-|----------|-------------------|-----------|
-| `app` start niet, DB-connectiefout | `db` nog niet `healthy` | Wachten op healthcheck; `docker compose logs db` |
-| Wachtwoordfout bij eerste start | `DB_PASSWORD` wijkt af tussen `.env` en al bestaand volume | `.env` rechtzetten óf volumes wissen in testfase (`docker compose down -v`) |
-| Pagina onbereikbaar na proxy-wissel | `TRUSTED_PROXIES` / `OVERWRITE*` niet gezet | Waarden in `.env` vullen en opnieuw `up` |
-| Upload mislukt op grote bestanden | `client_max_body_size` / Nextcloud uploadlimiet | Uploadlimiet verhogen in proxy én Nextcloud (zie `docs/`) |
+|---|---|---|
+| `app` start niet door een databasefout | MariaDB is nog niet gezond of credentials verschillen | Controleer `docker compose ps`, `.env` en `docker compose logs db` |
+| Redis-fout in Nextcloud | Redis is niet gezond of `REDIS_HOST` klopt niet | Controleer `docker compose logs redis` en gebruik servicenaam `redis` |
+| Wachtwoordfout bij een bestaande installatie | `.env` wijkt af van het bestaande `db-data`-volume | Zet de oorspronkelijke waarden terug; verwijder productievolumes niet |
+| Nextcloud meldt een ongeldige host | IP of hostnaam ontbreekt in trusted domains | Controleer `NEXTCLOUD_TRUSTED_DOMAINS` en herstart `app` |
+| Pagina op poort 8080 is onbereikbaar | Container gestopt, firewall of verkeerde poort | Controleer `docker compose ps`, logs en `HTTP_PORT=8080` |
+| Upload van grote bestanden mislukt | PHP-, Apache- of toekomstige proxylimiet is te laag | Controleer `PHP_UPLOAD_LIMIT`, `APACHE_BODY_LIMIT` en proxy-instellingen |
+| Data verschijnt op de systeemschijf | Dataschijf was niet gemount toen Compose startte | Stop Compose, herstel de mount en controleer de data vóór herstart |
+| Cron wordt niet uitgevoerd | `nc-cron` draait niet of Nextcloud staat niet op cronmodus | Controleer de cronlogs en de instelling voor achtergrondtaken |
+
+> **Waarschuwing:** gebruik `docker compose down -v` alleen in een bewust
+> wegwerpbare testomgeving. Dit verwijdert de named volumes en kan database- en
+> configuratiegegevens wissen.
