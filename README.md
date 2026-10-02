@@ -17,12 +17,16 @@ We richten ons op persoonlijke accounts en opslag, groepsmappen, quota en veilig
 
 ### 1. Infrastructuur — Timo
 
+**Focus:** de fundering, bereikbaarheid en basisbeveiliging van de VM.
+
 - De VM beveiligen met SSH-keys, wachtwoordlogin via SSH uitschakelen en een basisfirewall instellen.
 - Veilige toegang tot de VM regelen voor de andere drie teamleden.
 - Docker en Docker Compose of Podman installeren.
 - Een reverse proxy en TLS-certificaten voorbereiden; database- en beheerpoorten niet publiek toegankelijk maken.
 
 ### 2. Cloudplatform — Thorben
+
+**Focus:** de bestandsdelingssoftware selecteren, installeren en configureren.
 
 - Nextcloud, ownCloud en Seafile vergelijken en de definitieve keuze motiveren.
 - Een `docker-compose.yml` of installatiescript schrijven en testen.
@@ -31,6 +35,8 @@ We richten ons op persoonlijke accounts en opslag, groepsmappen, quota en veilig
 
 ### 3. Security, privacy en back-up — Maxime
 
+**Focus:** risico's beperken, gegevens beschermen en herstel mogelijk maken.
+
 - Een rollenmatrix uitwerken voor gebruiker, groepsbeheerder, supportoperator en platformbeheerder.
 - Maatregelen voor verdachte bestanden en bestandstypes onderzoeken, inclusief een mogelijke ClamAV-integratie.
 - Retentie voor prullenbak en bestandsversies bepalen en het offboardingbeleid vastleggen.
@@ -38,7 +44,8 @@ We richten ons op persoonlijke accounts en opslag, groepsmappen, quota en veilig
 
 ### 4. Architectuur en projectleiding — Michiel
 
-- Interviews met de doelgroep voorbereiden en uitvoeren over bestandsgrootte, samenwerking en verwachtingen; een haalbare doelgroep afbakenen.
+**Focus:** eisen, architectuur, afstemming met de doelgroep en het totaaloverzicht.
+
 - Dataflow- en storagediagrammen maken.
 - Acceptatiecriteria vertalen naar een concreet testplan, waaronder het weigeren van uploads boven de quota.
 - Monitoring onderzoeken voor bereikbaarheid, opslaggroei en certificaten, bijvoorbeeld met Prometheus/Grafana of Uptime Kuma.
