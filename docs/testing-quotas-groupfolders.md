@@ -4,11 +4,6 @@ Dit document beschrijft **hoe** we, zodra Nextcloud op de VM draait, de
 quota's en groepsmappen via de webinterface testen, en waar we het bewijs
 (screenshots / testresultaten) opslaan in `evidence/`.
 
-> Status: **testomgeving voor deze branch.** De tests worden uitgevoerd op de
-> VM (zie `infrastructure/install-notes.md`). Alle waarden die van de VM of van
-> de exacte Nextcloud-versie afhangen, zijn gemarkeerd als **`NOG INVULEN`**.
-> Bewijs gaat naar `evidence/test-results/` en `evidence/screenshots/`.
-
 Voor deze tests is de installatie uit `infrastructure/install-notes.md`
 gereed (Nextcloud bereikbaar, eerste beheeraccount aangemaakt, persistentie
 gecontroleerd). We loggen in als **platformbeheerder**.
