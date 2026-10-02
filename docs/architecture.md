@@ -1,175 +1,109 @@
 # Architectuur
 
-Dit document bevat het verplichte dataflow- en storagediagram voor de
-Studentencloud. De diagrammen zijn gebaseerd op de huidige Docker
-Compose-configuratie en [netwerk- en opslagdocumentatie](../infrastructure/network-storage.md).
+Dit document toont eenvoudig hoe de Studentencloud is opgebouwd. Het bevat het
+verplichte dataflowdiagram en storagediagram.
 
-## Status en scope
+## Is dit werkelijk de huidige situatie?
 
-De interne Nextcloud-stack en de 200 GB-dataschijf zijn vastgelegd. Tijdens de
-testfase is Nextcloud intern bereikbaar via `http://10.20.254.141:8080`. De
-definitieve reverse proxy met TLS, malwarecontrole, monitoring en het externe
-back-updoel moeten nog worden geïmplementeerd en getest. In de diagrammen zijn
-die onderdelen daarom gemarkeerd als **gepland**.
+Gedeeltelijk. De Docker-configuratie in de repository bevat werkelijk vier
+containers: Nextcloud, MariaDB, Redis en cron. Daarin staat ook dat alleen
+Nextcloud poort 8080 publiceert en dat gebruikersbestanden naar
+`/srv/nextcloud-data/data` worden geschreven.
 
-## Componenten
+De installatiedocumentatie vermeldt VM `studentencloud`, IP-adres
+`10.20.254.141`, Ubuntu Server 24.04 en een dataschijf van 200 GB. In de
+repository staat nog geen uitvoer van `docker compose ps`, `findmnt` of een
+testresultaat waarmee dit onafhankelijk is bewezen. Deze gegevens moeten dus op
+de VM worden gecontroleerd.
 
-| Component | Functie | Netwerktoegang | Opslag |
-|---|---|---|---|
-| Client | Browser of toegestane synchronisatieclient van student, docent of beheerder | Via tijdelijke testpoort; later via HTTPS | Lokale synchronisatiecache op het clientapparaat |
-| Reverse proxy | Geplande publieke ingang, TLS-beëindiging en doorsturen naar Nextcloud | Alleen HTTP/HTTPS volgens het goedgekeurde publicatiepad | Certificaten en proxyconfiguratie |
-| `nc-app` | Nextcloud-webapplicatie, authenticatie, delen, quota en bestandsbeheer | Hostpoort `8080` tijdens test; intern netwerk `nc-internal` | `nc-html` en de gemounte datamap |
-| `nc-cron` | Periodieke Nextcloud-achtergrondtaken | Alleen `nc-internal` | Deelt `nc-html` en de datamap met `nc-app` |
-| `nc-db` | MariaDB met accounts, bestandsmetadata, shares en applicatie-instellingen | Alleen `nc-internal`, poort 3306 niet gepubliceerd | Docker-volume `db-data` |
-| `nc-redis` | Cache en bestandsvergrendeling | Alleen `nc-internal`, poort 6379 niet gepubliceerd | Tijdelijke cache; geen primaire opslag |
-| Dataschijf | Persoonlijke bestanden, groepsbestanden, versies en prullenbakdata | Alleen via de app- en croncontainers | `/srv/nextcloud-data/data` op de 200 GB-schijf |
-| Malwarecontrole | Geplande controle van uploads met ClamAV/Nextcloud Antivirus | Alleen intern | Signatures, scanlog en eventueel tijdelijke scanruimte |
-| Monitoring | Geplande controle van bereikbaarheid, fouten, database, opslag, certificaat en back-up | Beperkt tot beheerders | Meetgegevens en meldingshistoriek |
-| Back-updoel | Geplande beveiligde kopie van bestanden, database en configuratie | Alleen voor bevoegde beheerders/back-upjob | Externe of afzonderlijke opslag; definitieve locatie nog vastleggen |
+TLS, reverse proxy, ClamAV, monitoring en back-up staan nog in de planning en
+zijn daarom niet als werkende onderdelen in de diagrammen getekend.
+
+## De onderdelen in gewone taal
+
+| Onderdeel | Eenvoudige uitleg |
+|---|---|
+| Nextcloud | De website waar gebruikers inloggen en bestanden beheren. |
+| MariaDB | Bewaart accounts, instellingen, rechten en informatie over bestanden. |
+| Redis | Helpt Nextcloud sneller en voorkomt dat twee processen tegelijk hetzelfde bestand aanpassen. |
+| Cron | Voert automatisch periodieke Nextcloud-taken uit. |
+| 200 GB-dataschijf | Bewaart de inhoud van gebruikers- en groepsbestanden. |
+| `nc-html` | Bewaart de Nextcloud-installatie en configuratie. |
+| `db-data` | Bewaart de MariaDB-database. |
 
 ## Dataflowdiagram
 
-In dit diagram betekenen doorgetrokken pijlen de huidige gegevensstromen.
-Gestippelde pijlen zijn nog geplande stromen.
+Dit diagram toont wat er gebeurt wanneer een gebruiker een bestand uploadt.
 
 ```mermaid
 flowchart LR
-    subgraph Clients[Gebruikers en beheerders]
-        User[Student / docent]
-        Admin[Platform- of supportbeheerder]
-        Guest[Ontvanger tijdelijke externe link]
-    end
-
-    subgraph Publication[Publicatiepad]
-        Test[Interne testtoegang<br/>HTTP 10.20.254.141:8080]
-        Proxy[Reverse proxy + TLS<br/>gepland]
-    end
-
-    subgraph VM[VM studentencloud - Ubuntu Server 24.04]
-        subgraph Docker[Docker-netwerk nc-internal]
-            App[nc-app<br/>Nextcloud 35 Apache]
-            Cron[nc-cron<br/>achtergrondtaken]
-            DB[(nc-db<br/>MariaDB 11.8)]
-            Redis[(nc-redis<br/>cache en locking)]
-        end
-        Data[(200 GB dataschijf<br/>gebruikers- en groepsbestanden)]
-        Html[(nc-html<br/>app en configuratie)]
-        AV[ClamAV / Antivirus<br/>gepland]
-        Monitor[Monitoring<br/>gepland]
-    end
-
-    Backup[(Afzonderlijk back-updoel<br/>gepland)]
-
-    User -->|testverkeer| Test --> App
-    Admin -->|testbeheer| Test
-    User -.->|HTTPS na ingebruikname| Proxy
-    Admin -.->|HTTPS na ingebruikname| Proxy
-    Guest -.->|tijdelijke link met wachtwoord en vervaldatum| Proxy
-    Proxy -.->|intern HTTP| App
-
-    App -->|SQL: accounts, metadata en shares| DB
-    App -->|sessies, cache en locks| Redis
-    App -->|lezen en schrijven van bestanden| Data
-    App -->|appcode en configuratie| Html
-    Cron -->|periodieke taken| DB
-    Cron -->|onderhoud bestanden| Data
-    Cron -->|appcode en configuratie| Html
-
-    App -.->|upload scannen| AV
-    Monitor -.->|status en metingen| App
-    Monitor -.->|databasecontrole| DB
-    Monitor -.->|capaciteit| Data
-    Data -.->|bestandsback-up| Backup
-    DB -.->|database-export| Backup
-    Html -.->|configuratieback-up| Backup
+    User[Gebruiker] -->|HTTP via poort 8080| Nextcloud[Nextcloud]
+    Nextcloud -->|bestand opslaan| Files[200 GB-dataschijf]
+    Nextcloud -->|account, rechten en metadata| Database[MariaDB]
+    Nextcloud -->|cache en file locking| Redis[Redis]
+    Cron[Cron] -->|periodieke taken| Nextcloud
 ```
 
-### Belangrijkste gegevensstromen
+In stappen:
 
-1. Een gebruiker meldt zich aan en verstuurt een aanvraag naar Nextcloud. In
-   de testfase loopt dit rechtstreeks via poort 8080; de doelsituatie gebruikt
-   HTTPS via de reverse proxy.
-2. Nextcloud controleert de account- en deelmetadata in MariaDB en gebruikt
-   Redis voor cache en bestandsvergrendeling.
-3. Bestandsinhoud wordt op de 200 GB-dataschijf opgeslagen. MariaDB bewaart de
-   bijbehorende metadata, eigenaar, shares en rechten.
-4. `nc-cron` voert periodieke taken uit met dezelfde configuratie en datamap.
-5. In de doelsituatie wordt een upload gecontroleerd door de malwarecontrole.
-   Geweigerde bestanden worden niet als gebruikersbestand opgeslagen.
-6. De back-upjob kopieert bestanden, een consistente database-export en de
-   configuratie naar een afzonderlijk doel. De restoretest gebeurt naar een
-   geïsoleerde testlocatie.
+1. De gebruiker opent Nextcloud via `http://10.20.254.141:8080`.
+2. Nextcloud controleert het account en de rechten via MariaDB.
+3. De inhoud van een upload gaat naar de 200 GB-dataschijf.
+4. MariaDB bewaart wie de eigenaar is en waar het bestand bij hoort.
+5. Redis ondersteunt cache en vergrendeling; cron voert achtergrondtaken uit.
 
 ## Storagediagram
 
 ```mermaid
 flowchart TB
-    subgraph Host[VM studentencloud]
-        subgraph SystemDisk[Systeemschijf - 32 GB]
-            OS[Ubuntu Server 24.04<br/>Docker Engine en Compose]
-            HtmlVol[(Docker-volume nc-html<br/>Nextcloud-app en configuratie)]
-            DBVol[(Docker-volume db-data<br/>MariaDB-metadata)]
-            RedisCache[(Redis-cache<br/>tijdelijke gegevens)]
-        end
+    VM[VM studentencloud]
+    VM --> Html[nc-html<br/>Nextcloud en configuratie]
+    VM --> DB[db-data<br/>database en metadata]
+    VM --> Disk[200 GB-dataschijf<br/>gebruikersbestanden]
 
-        subgraph DataDisk[Dataschijf - 200 GB ext4]
-            Mount["/srv/nextcloud-data/data"]
-            Personal[Persoonlijke opslag<br/>50 x 2 GB = 100 GB]
-            Groups[Groepsopslag<br/>8 x 5 GB = 40 GB]
-            Platform[Systeem- en platformreserve<br/>20 GB]
-            Archive[Beheer en archief<br/>10 GB]
-            Growth[Buffer en groeireserve<br/>30 GB]
-        end
-
-        App[nc-app]
-        Cron[nc-cron]
-        DB[nc-db]
-        Redis[nc-redis]
-    end
-
-    Backup[(Afzonderlijk back-updoel<br/>locatie nog vastleggen)]
-
-    App --> HtmlVol
-    Cron --> HtmlVol
-    DB --> DBVol
-    Redis --> RedisCache
-    App --> Mount
-    Cron --> Mount
-    Mount --> Personal
-    Mount --> Groups
-    Mount --> Platform
-    Mount --> Archive
-    Mount --> Growth
-
-    Mount -.->|bestanden, versies en prullenbak| Backup
-    DBVol -.->|consistente database-export| Backup
-    HtmlVol -.->|configuratie| Backup
+    Disk --> Personal[Persoonlijke bestanden]
+    Disk --> Groups[Groepsbestanden]
+    Disk --> Versions[Versies en prullenbak]
 ```
 
-De quota in het diagram zijn planningswaarden en geen fysieke partities. Alle
-gebruikersdata deelt hetzelfde bestandssysteem. Nextcloud handhaaft de quota
-logisch per gebruiker en groepsmap. De reserves voorkomen dat de volledige
-dataschijf vooraf aan gebruikers wordt toegewezen.
+De persoonlijke quota van 2 GB en groepsquota van 5 GB zijn logische limieten
+in Nextcloud. Het zijn geen aparte schijfpartities. Alle bestanden staan samen
+op de 200 GB-dataschijf, maar Nextcloud houdt per gebruiker en groep bij hoeveel
+ruimte gebruikt mag worden.
 
-## Beveiligings- en vertrouwensgrenzen
+## Wat komt er later nog bij?
 
-- MariaDB en Redis publiceren geen hostpoorten en zijn alleen bereikbaar via
-  `nc-internal`.
-- De tijdelijke poort 8080 hoort alleen op het interne testnetwerk bereikbaar
-  te zijn. Dit moet met een poortscan worden bewezen.
-- De reverse proxy wordt de enige ingang voor normaal gebruikersverkeer zodra
-  TLS actief is.
-- Wachtwoorden, MFA-geheimen en encryptiesleutels worden niet in Git of in de
-  diagrammen opgenomen.
-- Een back-up bestaat uit gebruikersdata, metadata/database en configuratie.
-  Synchronisatie, versiebeheer en prullenbak gelden niet als back-up.
+Voor de definitieve omgeving moeten nog worden toegevoegd en getest:
 
-## Nog te bevestigen na implementatie
+- een reverse proxy met HTTPS/TLS vóór Nextcloud;
+- ClamAV voor controle van uploads;
+- monitoring van bereikbaarheid, opslag, database, certificaat en back-up;
+- een afzonderlijk back-updoel voor bestanden, database en configuratie.
 
-- Definitieve hostname, reverse proxy en TLS-certificaat.
-- Bereikbaarheid van poort 8080 na ingebruikname van de reverse proxy.
-- Definitieve ClamAV-verbinding en plaats van scanlogs.
-- Monitoringtool, meetpunten, drempels en meldingskanaal.
-- Back-uptool, back-updoel, retentie en versleutelingsmethode.
-- Werkelijk Docker-data-root voor de named volumes `nc-html` en `db-data`.
-- Resultaten van netwerk-, opslag-, malware- en restoretests in `evidence/`.
+Wanneer deze onderdelen echt zijn geïnstalleerd, moeten de diagrammen worden
+bijgewerkt.
+
+## Hoe controleer je of het diagram klopt?
+
+Voer op de VM uit:
+
+```bash
+cd infrastructure/docker
+docker compose ps
+docker compose exec app php occ status
+findmnt /srv/nextcloud-data
+df -h /srv/nextcloud-data
+docker compose port db 3306
+docker compose port redis 6379
+```
+
+Het diagram is bevestigd wanneer:
+
+- `nc-app`, `nc-db`, `nc-redis` en `nc-cron` draaien;
+- Nextcloud versie 35 rapporteert;
+- `/srv/nextcloud-data` werkelijk op de 200 GB-schijf is gemount;
+- MariaDB en Redis geen gepubliceerde hostpoort tonen;
+- een geüpload testbestand na `docker compose restart` nog aanwezig is.
+
+Bewaar de uitvoer en screenshots in `evidence/test-results/` en
+`evidence/screenshots/`.
