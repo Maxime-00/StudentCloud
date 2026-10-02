@@ -2,7 +2,7 @@
 
 **Datum:** 2026-10-02. **Basis:** opgehaalde origin-branches na `git fetch origin --prune`.
 
-Deze analyse is gebaseerd op Git-inhoud, zonder deployment of acceptatietests uit te voeren. De opdrachttekst en informatie over PR's zijn niet beschikbaar in de repository. De requirement-ID's verwijzen naar [PROJECT_CHECKLIST.md](../PROJECT_CHECKLIST.md).
+Deze historische analyse is gebaseerd op Git-inhoud, zonder deployment of acceptatietests uit te voeren. De opdrachttekst was tijdens die analyse nog niet beschikbaar; de checklist is daarna afgestemd op de officiële opdracht. Informatie over PR's was niet beschikbaar. De requirement-ID's verwijzen naar [PROJECT_CHECKLIST.md](../PROJECT_CHECKLIST.md). Onderstaande tabellen beschrijven de oorspronkelijke momentopname en zijn geen nieuwe analyse van implementatievoortgang.
 
 ## Branches en commits
 
@@ -46,6 +46,10 @@ Er zijn geen branches genaamd `application` of `architecture` aangetroffen. `ori
 Geen requirement is **Waarschijnlijk klaar** op basis van de gevonden inhoud. Of er buiten Git al een omgeving is ingericht, is **Onzeker**; zonder configuratie en testbewijs verandert dat de checklist niet.
 
 ## Overlap, conflicten en aandachtspunten
+
+### Aanvulling na opdrachtcontrole
+
+De checklist bevat nu ook M13 (rollen), M14 (delen), M15 (publieke links), M16 (retentie), M17 (uploadlimieten) en M18 (gebruikersgids). Deze staan op Todo: in de onderzochte commits is geen implementatiebewijs aangetroffen. De securitycommit bevat alleen concepten voor rollen en retentie. Bestaande eisen zijn aangescherpt, onder andere voor quotawaarschuwingen, monitoring en lifecycle. Het nieuwe acceptatietestplan en de projectplanning zijn documentatie, geen geslaagde tests of gerealiseerde functionaliteit.
 
 - De huidige wijzigingen tonen geen bestandsconflicten tussen werkbranches: configuratie en infra zijn gelijk aan de referentie; security voegt één nieuw bestand toe.
 - Inhoudelijke overlap is te verwachten bij M09 (Security + Applicatie), M10 (Security + Infra) en M12 (Architect + Security + Applicatie). Stem implementatie en bewijs af voordat dezelfde documentatie op meerdere branches wordt bijgewerkt.
