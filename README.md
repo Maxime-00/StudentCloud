@@ -6,7 +6,9 @@ Korte beschrijving van het project en de belangrijkste doelstellingen.
 
 ## Documentatie
 
-Overzicht van de beschikbare technische en functionele documentatie.
+- [Installatie en uitgevoerde serverconfiguratie](infrastructure/install-notes.md)
+- [Netwerkopslag](infrastructure/network-storage.md)
+- Aanvullende ontwerp-, beveiligings- en testdocumentatie staat in `docs/`.
 
 ## Aan de slag
 
