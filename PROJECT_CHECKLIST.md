@@ -77,7 +77,7 @@ Alle bewijsstukken hieronder met het label **verplicht** worden expliciet gevraa
 | Opleverstuk | Eigenaar | Locatie | Huidige stand |
 |---|---|---|---|
 | Toolvergelijking — verplicht | Applicatiespecialist | [docs/tool-comparison.md](docs/tool-comparison.md) | Uitgebreide Nextcloud-vergelijking nu op origin/main; infra bevat nog conflictmarkeringen in de vergelijking. Versie/support en keuze nog reviewen (M01). |
-| Dataflow- en storagediagram — verplicht | Architect | [docs/architecture.md](docs/architecture.md) | Sjabloon; beide diagrammen maken. |
+| Dataflow- en storagediagram — verplicht | Architect | [docs/architecture.md](docs/architecture.md) | Beide conceptdiagrammen zijn uitgewerkt op basis van de huidige Compose- en opslagconfiguratie; geplande TLS-, malware-, monitoring- en back-upstromen na implementatie controleren. |
 | Installatie en beheer | Systeembeheerder | [infrastructure/install-notes.md](infrastructure/install-notes.md) | Installatieplan met `NOG INVULEN` en Compose nu op origin/main; afwijkende infra-stack nog afstemmen. Geen draaiende installatie aangetoond. |
 | Rollenmatrix — verplicht | Security Engineer + Applicatiespecialist | [docs/roles-security.md](docs/roles-security.md) | Concept op main met vier rollen; uitvoerbaarheid, MFA-regels en toegangsproeven nog controleren (M13). |
 | Privacy- en retentieanalyse — verplicht | Security Engineer | [docs/policies.md](docs/policies.md) | Concept met retentiewaarden op main; dataclassificatie, risicoanalyse en eenduidige offboarding nog afwerken (M16). |
