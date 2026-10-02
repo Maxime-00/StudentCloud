@@ -8,9 +8,9 @@ Compose. De containerconfiguratie staat in `infrastructure/docker/`:
 - `.env.example` is het sjabloon voor configuratiewaarden en geheimen;
 - `.env` bevat de echte lokale waarden en wordt niet gecommit.
 
-> **Status:** testomgeving op Ubuntu Server 24.04. Nextcloud is tijdelijk
-> rechtstreeks bereikbaar via poort 8080. De definitieve publicatie via een
-> reverse proxy en TLS moet nog worden ingericht.
+> **Status:** testomgeving op Ubuntu Server 24.04. Nginx publiceert Nextcloud
+> via HTTP op poort 80; de container zelf luistert alleen op
+> `127.0.0.1:8080`. TLS is nog niet geconfigureerd.
 
 ## Huidige infrastructuur
 
@@ -24,7 +24,8 @@ Compose. De containerconfiguratie staat in `infrastructure/docker/`:
 | Database | `mariadb:11.8` |
 | Cache en file locking | `redis:7-alpine` |
 | Achtergrondtaken | aparte `nc-cron`-container |
-| Tijdelijke test-URL | `http://10.20.254.141:8080` |
+| Test-URL via Nginx | `http://10.20.254.141` |
+| Lokale containerbinding | `127.0.0.1:8080` |
 | Dataschijf | 200 GB, gemount op `/srv/nextcloud-data` |
 | Nextcloud-datamap | `/srv/nextcloud-data/data` |
 
@@ -32,29 +33,31 @@ Compose. De containerconfiguratie staat in `infrastructure/docker/`:
 
 | Component | Container | Rol | Extern gepubliceerd |
 |---|---|---|---|
-| Nextcloud | `nc-app` | Webinterface, bestanden en gebruikersbeheer | Ja, tijdelijk op poort 8080 |
+| Nextcloud | `nc-app` | Webinterface, bestanden en gebruikersbeheer | Nee; alleen `127.0.0.1:8080` |
 | MariaDB | `nc-db` | Metadata voor gebruikers, mappen, shares en versies | Nee |
 | Redis | `nc-redis` | Caching en transactionele file locking | Nee |
 | Cron | `nc-cron` | Periodieke Nextcloud-achtergrondtaken | Nee |
 
 MariaDB en Redis zijn bewust alleen bereikbaar via het interne Docker-netwerk
-`nc-internal`. Alleen de Nextcloud-app publiceert tijdelijk een hostpoort.
+`nc-internal`; poorten 3306 en 6379 worden niet op de host gepubliceerd.
+Nextcloud is alleen aan de loopbackinterface van de VM gekoppeld.
 
 ```text
 Gebruiker
    |
-   | http://10.20.254.141:8080
+   | http://10.20.254.141 (poort 80)
    v
-Nextcloud (nc-app) ----> MariaDB (nc-db, intern)
-       |--------------> Redis (nc-redis, intern)
-       |
-       +--------------> /srv/nextcloud-data/data
+Nginx ----> 127.0.0.1:8080 ----> Nextcloud (nc-app)
+                                      |----> MariaDB (nc-db, intern)
+                                      |----> Redis (nc-redis, intern)
+                                      +----> /srv/nextcloud-data/data
 
 Cron (nc-cron) --------> gedeelde Nextcloud-installatie en datamap
 ```
 
-In productie hoort de gegevensstroom via een reverse proxy met TLS te lopen.
-De database-, Redis- en beheerpoorten blijven daarbij intern.
+Nginx gebruikt de configuratie
+`infrastructure/nginx/studentencloud.conf`. HTTPS-publicatie moet nog worden
+bepaald omdat er momenteel geen domeinnaam beschikbaar is.
 
 ## Vereisten
 
@@ -137,7 +140,7 @@ docker compose config
 Controleer vóór het starten dat:
 
 - alleen `app` een `ports`-regel heeft;
-- de standaard testpoort `8080:80` is;
+- de poortmapping `127.0.0.1:${HTTP_PORT:-8080}:80` is;
 - MariaDB en Redis geen hostpoorten publiceren;
 - `/srv/nextcloud-data/data` aan `/var/www/html/data` is gekoppeld;
 - zowel `app` als `cron` de datamap en het volume `nc-html` gebruiken.
@@ -176,11 +179,14 @@ docker compose logs cron
 
 ### 5. Nextcloud openen
 
-Open in het interne netwerk:
+Open in het interne netwerk via Nginx:
 
 ```text
-http://10.20.254.141:8080
+http://10.20.254.141
 ```
+
+Rechtstreekse toegang tot `10.20.254.141:8080` is bewust geblokkeerd. Nginx
+stuurt aanvragen op poort 80 door naar `127.0.0.1:8080`.
 
 Meld aan met `NEXTCLOUD_ADMIN_USER` en het lokaal ingestelde
 `NEXTCLOUD_ADMIN_PASSWORD`. Controleer in het beheeroverzicht:
@@ -222,18 +228,21 @@ achtergrondtaken is geselecteerd.
 
 Hiermee worden zowel de bind mount als de herstartbestendigheid getest.
 
-### 8. Productiepublicatie voorbereiden
+### 8. Netwerkhardening en publicatie
 
-De huidige poort 8080 is alleen bedoeld voor intern testen. Voor productie:
-
-- plaats Nextcloud achter een reverse proxy met HTTPS;
-- configureer de trusted proxy en overwrite-instellingen van Nextcloud;
-- sluit de rechtstreekse testpoort zodra de proxy is gevalideerd;
-- publiceer MariaDB-poort 3306 en Redis-poort 6379 nooit;
-- test de externe URL, certificaatketen en uploadlimieten.
-
-Deze stap vereist een afzonderlijke, gecontroleerde wijziging aan de
-Compose- en proxyconfiguratie.
+- Nginx luistert op poort 80 en gebruikt
+  `infrastructure/nginx/studentencloud.conf` als projectconfiguratie.
+- Docker bindt Nextcloud uitsluitend aan `127.0.0.1:8080`; poort 8080 is dus
+  niet via het VM-adres bereikbaar.
+- Nextcloud vertrouwt Docker-gateway `172.18.0.1` als proxy.
+- MariaDB-poort 3306 en Redis-poort 6379 zijn niet op de host gepubliceerd.
+- UFW gebruikt `default deny incoming` en `default allow outgoing`.
+- De firewallregels zijn `ufw limit 22/tcp`, `ufw allow 80/tcp` en
+  `ufw allow 443/tcp`. SSH op poort 22 blijft nodig voor teamleden en
+  leerkrachten.
+- Poort 443 is voorbereid voor HTTPS, maar TLS is nog niet geconfigureerd.
+  De HTTPS- en publicatiemethode wordt gekozen zodra er een domeinnaam of een
+  passend alternatief beschikbaar is.
 
 ## Verificatie
 
@@ -241,8 +250,10 @@ Compose- en proxyconfiguratie.
 docker compose ps
 docker compose exec app php occ status
 docker compose exec app php occ config:system:get version
+docker compose exec app php occ config:system:get trusted_proxies
 findmnt /srv/nextcloud-data
 df -h /srv/nextcloud-data
+sudo ufw status verbose
 ```
 
 Verwacht resultaat:
@@ -251,7 +262,9 @@ Verwacht resultaat:
 - MariaDB en Redis rapporteren een gezonde status;
 - Nextcloud rapporteert versie 35;
 - `/srv/nextcloud-data` is gemount vanaf de 200 GB-dataschijf;
-- Nextcloud is intern bereikbaar op `10.20.254.141:8080`.
+- trusted proxy `172.18.0.1` is ingesteld;
+- Nextcloud is via Nginx bereikbaar op `http://10.20.254.141`;
+- directe toegang tot `10.20.254.141:8080` werkt niet.
 
 ## Problemen oplossen
 
@@ -261,7 +274,8 @@ Verwacht resultaat:
 | Redis-fout in Nextcloud | Redis is niet gezond of `REDIS_HOST` klopt niet | Controleer `docker compose logs redis` en gebruik servicenaam `redis` |
 | Wachtwoordfout bij een bestaande installatie | `.env` wijkt af van het bestaande `db-data`-volume | Zet de oorspronkelijke waarden terug; verwijder productievolumes niet |
 | Nextcloud meldt een ongeldige host | IP of hostnaam ontbreekt in trusted domains | Controleer `NEXTCLOUD_TRUSTED_DOMAINS` en herstart `app` |
-| Pagina op poort 8080 is onbereikbaar | Container gestopt, firewall of verkeerde poort | Controleer `docker compose ps`, logs en `HTTP_PORT=8080` |
+| `10.20.254.141:8080` is onbereikbaar | Verwacht gedrag: Docker bindt alleen aan localhost | Gebruik `http://10.20.254.141` via Nginx |
+| Nginx geeft `502 Bad Gateway` | Nextcloud draait niet of luistert niet op `127.0.0.1:8080` | Controleer `docker compose ps`, logs en de Nginx-configuratie |
 | Upload van grote bestanden mislukt | PHP-, Apache- of toekomstige proxylimiet is te laag | Controleer `PHP_UPLOAD_LIMIT`, `APACHE_BODY_LIMIT` en proxy-instellingen |
 | Data verschijnt op de systeemschijf | Dataschijf was niet gemount toen Compose startte | Stop Compose, herstel de mount en controleer de data vóór herstart |
 | Cron wordt niet uitgevoerd | `nc-cron` draait niet of Nextcloud staat niet op cronmodus | Controleer de cronlogs en de instelling voor achtergrondtaken |
