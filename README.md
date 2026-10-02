@@ -4,7 +4,9 @@
 
 Voor Project 9 bouwen we een studentencloud op een Proxmox-VM: een open-source platform waarmee studenten bestanden kunnen opslaan, delen en samen aan groepswerk kunnen werken.
 
-We richten ons op persoonlijke accounts en opslag, groepsmappen, quota en veilig toegangsbeheer. TLS, MFA voor beheerders, malwaremaatregelen, back-up en herstel vormen de basis voor een veilige en beheersbare oplossing. De platformkeuze wordt onderbouwd met een toolvergelijking en gebruikersinterviews; de werking tonen we aan met acceptatietests en bewijsstukken.
+We richten ons op persoonlijke accounts en opslag, groepsmappen, quota met waarschuwingen en gecontroleerd delen. TLS via het goedgekeurde publicatiepad, MFA voor beheerders waar beschikbaar, upload- en bestandsbeleid, back-up en herstel vormen de basis voor een veilige en beheersbare oplossing. De platformkeuze wordt onderbouwd met een toolvergelijking en gebruikersinterviews; de werking tonen we aan met acceptatietests en bewijsstukken.
+
+De [officiële opdracht](https://github.com/MathieuLeroy2/network-experience-2627/blob/main/projecten/09-studentencloud.md) is de basis voor onze checklist. We kiezen een haalbare doelgroep en scope; de [projectplanning](docs/project-plan.md) bevat de mijlpalen, interviewonderwerpen en scopegrenzen.
 
 ## Team en rolverdeling
 
@@ -31,7 +33,9 @@ We richten ons op persoonlijke accounts en opslag, groepsmappen, quota en veilig
 - Nextcloud, ownCloud en Seafile vergelijken en de definitieve keuze motiveren.
 - Een `docker-compose.yml` of installatiescript schrijven en testen.
 - VM-opslag koppelen en persoonlijke opslag, groepsmappen, quota en waarschuwingen bij bijna volle opslag configureren.
-- Lokale accounts en MFA voor beheerders instellen en testen.
+- Lokale accounts en MFA voor beheerders waar beschikbaar instellen en testen.
+- Intern delen en tijdelijke externe links met wachtwoord en vervaldatum configureren; publieke links standaard uitschakelen of strikt begrenzen.
+- Veilige uploadlimieten vastleggen en een gebruikersgids voor synchronisatie, delen, quota en herstel schrijven.
 
 ### 3. Security, privacy en back-up — Maxime
 
@@ -39,16 +43,18 @@ We richten ons op persoonlijke accounts en opslag, groepsmappen, quota en veilig
 
 - Een rollenmatrix uitwerken voor gebruiker, groepsbeheerder, supportoperator en platformbeheerder.
 - Maatregelen voor verdachte bestanden en bestandstypes onderzoeken, inclusief een mogelijke ClamAV-integratie.
-- Retentie voor prullenbak en bestandsversies bepalen en het offboardingbeleid vastleggen.
-- Een back-upstrategie voor database, configuratie en gebruikersdata uitwerken en een restore-oefening voorbereiden.
+- Privacyrisico's en dataclassificatie beoordelen, retentie voor prullenbak en bestandsversies bepalen en het offboarding-/verwijderbeleid vastleggen.
+- Een back-upstrategie voor database, configuratie en gebruikersdata uitwerken en een restore-oefening uitvoeren met bewijs van herstelde bestanden en metadata/rechten.
 
 ### 4. Architectuur en projectleiding — Michiel
 
 **Focus:** eisen, architectuur, afstemming met de doelgroep en het totaaloverzicht.
 
+- Gebruikers interviewen over bestandsgrootte, samenwerking, externe links, versieherstel en verwachtingen bij verwijdering; een haalbare doelgroep en succescriteria bepalen.
 - Dataflow- en storagediagrammen maken.
 - Acceptatiecriteria vertalen naar een concreet testplan, waaronder het weigeren van uploads boven de quota.
-- Monitoring onderzoeken voor bereikbaarheid, opslaggroei en certificaten, bijvoorbeeld met Prometheus/Grafana of Uptime Kuma.
+- Met Timo monitoring uitwerken voor bereikbaarheid, opslaggroei, fouten, database, certificaten en back-ups; storage-/resourceproeven en capaciteitsadvies coördineren.
+- Met Maxime onboarding/offboardingrunbooks, accountreview en verwijderprocedures uitwerken.
 - Eisen, afhankelijkheden en voortgang binnen het team opvolgen.
 
 ## Documentatie
@@ -60,6 +66,7 @@ We richten ons op persoonlijke accounts en opslag, groepsmappen, quota en veilig
 =======
 - [Requirements en voortgang](PROJECT_CHECKLIST.md): Musts, Shoulds, Coulds, rollen, statussen en benodigde bewijsstukken.
 - [Branchanalyse](docs/branch-analysis.md): koppeling van branchwijzigingen en commits aan requirements.
+- [Projectplanning en scope](docs/project-plan.md): doelgroep, interviews en mijlpalen van week 2 tot week 12.
 - [Toolvergelijking](docs/tool-comparison.md) en [architectuur](docs/architecture.md).
 - [Rollen en beveiliging](docs/roles-security.md), [beleid](docs/policies.md) en [back-up en herstel](docs/backup-restore.md).
 - [Installatienotities](infrastructure/install-notes.md) en [netwerk en opslag](infrastructure/network-storage.md).
