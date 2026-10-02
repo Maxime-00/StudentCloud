@@ -1,10 +1,57 @@
 # Netwerk en opslag
 
+Dit document dekt het interne netwerk en de opslag van de Studentencloud
+(Nextcloud via Docker). De container-definities staan in
+`infrastructure/docker/docker-compose.yml`.
+
+> Status: **testomgeving voor deze branch.** Adressen, poorten en de
+> reverse-proxy/TLS-publicatie hangen af van de VM en van persoon 1 en zijn
+> gemarkeerd als **`NOG INVULEN`**.
+
 ## Netwerkconfiguratie
 
-Beschrijf hier de netwerkopbouw, adressen en verbindingen.
+### Interne opbouw
+- Docker-netwerk `nc-internal` (bridge): verbindt `nc-app` (Nextcloud) en
+  `nc-db` (MariaDB) zonder dat ze publiek bereikbaar zijn.
+- De database heeft **geen** exposed port; alleen `nc-app` luistert — en in de
+  testfase alleen op de interne testpoort (`${HTTP_PORT}`, standaard 8080).
+- Publieke publicatie + TLS loopt via de **reverse proxy van persoon 1**
+  (Nginx/Traefik). Die staat bewust buiten deze compose.
+
+| Verbinding | Van | Naar | Poort | Toegankelijkheid |
+|-----------|-----|------|-------|------------------|
+| DB | `nc-app` | `nc-db` | 3306 | alleen `nc-internal` |
+| App (test) | host | `nc-app` | `${HTTP_PORT}:80` | intern, tijdelijk |
+| App (productie) | reverse proxy (P1) | `nc-app` | 80 | via proxy + TLS — `NOG INVULEN` |
+
+### Adressen / poorten — `NOG INVULEN`
+| Vraag | Waarde |
+|-------|--------|
+| IP / subnet van de VM | `NOG INVULEN` |
+| Hostname (productie, via P1) | `NOG INVULEN` |
+| Testpoort (tijdelijk) | `NOG INVULEN` (standaard 8080) |
+| Proxy-poorten (productie) | `NOG INVULEN door P1` |
 
 ## Opslag
+
+De opslag wordt op twee niveaus beschreven: (1) de **technische volumes** die
+de installatie op de VM gebruikt, en (2) het **logische capaciteits- en
+quotamodel** dat de 200 GB verdeelt over studenten, groepen en reserves.
+
+### Technische volumes (implementatie)
+
+Persistente volumes (gedefinieerd in `docker-compose.yml`):
+
+| Volume | Inhoud | Bewaart |
+|--------|--------|--------|
+| `nc-files` | `/var/www/html/data` | de **bestanden** zelf, uploads, versies |
+| `nc-config` | `/var/www/html/config` | Nextcloud-configuratie (`config.php`) |
+| `db-data` | `/var/lib/mysql` | **metadata**: gebruikers, mappen, delen, versies |
+
+- Volumes blijven na `docker compose down` bestaan (alleen `-v` wist ze).
+- De opslag ligt persistent op de VM.
+
+### Logisch capaciteitsmodel
 
 De Studentencloud gebruikt twee afzonderlijke opslagcomponenten met verschillende capaciteiten en doelen:
 
@@ -15,7 +62,7 @@ De Studentencloud gebruikt twee afzonderlijke opslagcomponenten met verschillend
 
 De 200 GB cloudopslag vormt de persistente bron van waarheid. De 32 GB is niet bedoeld als permanente opslag, maar ondersteunt de prestaties en beschikbaarheid van actieve gebruikers.
 
-### Verdeling van de 200 GB over groepen
+#### Verdeling van de 200 GB over groepen
 
 Verdeling uitgegaan van circa 50 studenten, minder dan 10 projectgroepen en
 gebruik dat soms grotere datasets betreft. Het model houdt bewust ruimte (reserves +
@@ -44,11 +91,18 @@ buffer) vrij zodat het platform niet tegen de limiet loopt en groeigruimte heeft
   ruimte uit de buffer — de Platformbeheerder keert dit uit, de Supportoperator blijft
   binnen limiet **X**.
 - **Monitor:** Supportoperator houdt gebruik per groep bij; als een categorie >80 % van
-  z'n subto­taal benadert, verschuift ruimte uit de buffer.
+  z'n subtotaal benadert, verschuift ruimte uit de buffer.
 
 > Aanpasbaar: verleg GB tussen de rijen als het aantal studenten of groepen verandert,
 > en behoud de som op 200 GB.
 
 ## Controle
 
-Noteer hier hoe netwerk en opslag worden getest.
+- **Netwerk (test):** `nc-app` bereikt `nc-db` via de container-naam; van de
+  host is de DB **niet** direct bereikbaar (geen exposed port).
+- **Netwerk (productie):** na proxy-wissel verifiëren dat alleen de proxy
+  publiek bereikbaar is, en dat DB/beheerpoorten gesloten zijn.
+- **Opslag (persistentie):** testbestand uploaden, `docker compose restart`,
+  bestand moet nog aanwezig zijn (bewijst `nc-files`).
+- **Opslag (restore):** zie `docs/backup-restore.md` — geselecteerde bestanden
+  én metadata naar een testlocatie herstellen.

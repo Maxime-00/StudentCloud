@@ -1,0 +1,6 @@
+# Lokale, machine-specifieke waarden en geheime. Niet committen.
+.env
+.env.local
+
+# Lokale Docker-runtimeartefacten (indien hier binnen aangemaakt).
+*.log
