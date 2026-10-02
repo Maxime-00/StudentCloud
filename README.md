@@ -59,11 +59,6 @@ De [officiële opdracht](https://github.com/MathieuLeroy2/network-experience-262
 
 ## Documentatie
 
-<<<<<<< HEAD
-- [Installatie en uitgevoerde serverconfiguratie](infrastructure/install-notes.md)
-- [Netwerkopslag](infrastructure/network-storage.md)
-- Aanvullende ontwerp-, beveiligings- en testdocumentatie staat in `docs/`.
-=======
 - [Requirements en voortgang](PROJECT_CHECKLIST.md): Musts, Shoulds, Coulds, rollen, statussen en benodigde bewijsstukken.
 - [Branchanalyse](docs/branch-analysis.md): koppeling van branchwijzigingen en commits aan requirements.
 - [Projectplanning en scope](docs/project-plan.md): doelgroep, interviews en mijlpalen van week 2 tot week 12.
@@ -71,7 +66,6 @@ De [officiële opdracht](https://github.com/MathieuLeroy2/network-experience-262
 - [Rollen en beveiliging](docs/roles-security.md), [beleid](docs/policies.md) en [back-up en herstel](docs/backup-restore.md).
 - [Installatienotities](infrastructure/install-notes.md) en [netwerk en opslag](infrastructure/network-storage.md).
 - [Acceptatietests](docs/acceptance-tests.md) en bewijsstukken in [evidence/](evidence/).
->>>>>>> origin/main
 
 ## Aan de slag
 
