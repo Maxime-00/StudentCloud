@@ -66,6 +66,7 @@ De [officiële opdracht](https://github.com/MathieuLeroy2/network-experience-262
 - [Rollen en beveiliging](docs/roles-security.md), [beleid](docs/policies.md) en [back-up en herstel](docs/backup-restore.md).
 - [Installatienotities](infrastructure/install-notes.md) en [netwerk en opslag](infrastructure/network-storage.md).
 - [Acceptatietests](docs/acceptance-tests.md) en bewijsstukken in [evidence/](evidence/).
+- [Automatische controles (CI)](docs/ci.md): Compose, Nginx, lokale documentlinks en secrets bij pull requests.
 
 ## Aan de slag
 
