@@ -41,6 +41,10 @@ consistente back-up van de huidige Compose-stack. Het script:
 - archiveert het Nextcloud-volume en de afzonderlijke datamap;
 - bewaart numerieke eigenaars, ACL's en extended attributes voor data;
 - schrijft SHA-256-controlesommen en gesaneerde statusinformatie;
+- probeert het uitschakelen van onderhoudsmodus maximaal één minuut opnieuw als
+  de database tijdelijk niet bereikbaar is;
+- markeert een back-up pas als voltooid nadat onderhoudsmodus succesvol is
+  uitgeschakeld;
 - laat een onvolledige back-up herkenbaar achter met suffix `.incomplete`.
 
 Voer het script op de VM uit vanuit de repository:

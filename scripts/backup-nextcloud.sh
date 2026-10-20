@@ -92,12 +92,33 @@ mkdir -p "$work_dir"
 maintenance_enabled_by_script=0
 backup_complete=0
 
+restore_maintenance_mode() {
+  if [[ $maintenance_enabled_by_script -ne 1 ]]; then
+    return 0
+  fi
+
+  printf 'Disabling Nextcloud maintenance mode...\n'
+  for attempt in {1..12}; do
+    if docker exec --user www-data "$app_container" php occ maintenance:mode --off; then
+      maintenance_enabled_by_script=0
+      return 0
+    fi
+
+    if [[ $attempt -lt 12 ]]; then
+      printf 'Maintenance-mode recovery attempt %d failed; retrying in 5 seconds...\n' "$attempt" >&2
+      sleep 5
+    fi
+  done
+
+  return 1
+}
+
 cleanup() {
   exit_code=$?
 
   if [[ $maintenance_enabled_by_script -eq 1 ]]; then
-    if ! docker exec --user www-data "$app_container" php occ maintenance:mode --off; then
-      printf 'WARNING: could not disable Nextcloud maintenance mode. Check it manually.\n' >&2
+    if ! restore_maintenance_mode; then
+      printf 'ERROR: could not disable Nextcloud maintenance mode after retries. Check the database and disable it manually.\n' >&2
       exit_code=1
     fi
   fi
@@ -155,6 +176,11 @@ Data source: $data_dir
 This directory contains sensitive StudentCloud data. Keep it encrypted at rest,
 restrict access, and never commit it to Git.
 EOF
+
+if ! restore_maintenance_mode; then
+  printf 'Backup data was captured, but service recovery failed. The backup remains incomplete.\n' >&2
+  exit 1
+fi
 
 mv "$work_dir" "$final_dir"
 backup_complete=1
