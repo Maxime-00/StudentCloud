@@ -1,0 +1,16 @@
+title = "Studentencloud secret scanning"
+
+[extend]
+useDefault = true
+
+# This historical evidence example contains a literal placeholder, not a password.
+# Other values and other files must still be scanned with the default rules.
+[[rules]]
+id = "curl-auth-user"
+
+[[rules.allowlists]]
+description = "Literal <apppassword> placeholder in the quota test example"
+condition = "AND"
+paths = ['''^evidence/test-results/test-at-q1-quota\.md$''']
+regexTarget = "secret"
+regexes = ['''^['"]?[^:\s'"]+:<apppassword>['"]?$''']

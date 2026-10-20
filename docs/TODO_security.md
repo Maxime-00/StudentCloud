@@ -15,7 +15,7 @@ doorlopend aanvullen tot ze voldoen aan de acceptatietests.
 
 | # | Taak | Status | Verantwoordelijk | Afhankelijk van |
 |---|------|--------|------------------|-----------------|
-| 1 | Rollenmatrix (verplicht bewijsstuk) | ◑ Klaar (review door Rol 1/2)¹ | Rol 3 | — |
+| 1 | Rollenmatrix (verplicht bewijsstuk) | ✅ Geverifieerd (1-op-1 getoetst in Nextcloud)¹ | Rol 3 | — |
 | 2 | Retentie- en offboardingbeleid | ◑ Klaar (review door Rol 1/2) | Rol 3 | Taak 1 |
 | 3 | Back-up & Restore-strategie | ◑ Klaar (review door Rol 1/2)² | Rol 3 + Rol 1 | Taak 2 |
 | 4 | Malwaremaatregelen (ClamAV) | ◑ Klaar (review door Rol 1/2)³ | Rol 3 + Rol 2 | Platform gekozen (Nextcloud) |
@@ -24,8 +24,10 @@ doorlopend aanvullen tot ze voldoen aan de acceptatietests.
 Statuslegenda: ☐ Open · ◐ In uitvoering · ◑ Klaar (review door Rol 1/2) · ✅ Geverifieerd (acceptatietest)
 
 ¹ Taak 1: matrix, toelichting per cel en toewijzingsroute staan op papier (gespiegeld in
-`docs/roles-security.md`). Alleen het toetsen of de matrix 1-op-1 realiseerbaar is in het
-gekozen platform (Rol 2) is nog open.
+`docs/roles-security.md`). **Geverifieerd 2026-10-02:** de matrix is 1-op-1 realizeerbaar
+in Nextcloud 35 — alle 5 toetspunten (upload-blokkade, wachtwoordlinks, quota 2/5 GB,
+logbeperking, MFA verplicht) zijn geïmplementeerd en getoetst, zie
+`evidence/test-results/test-rollenmatrix-1op1.md`.
 
 ² Taak 3: strategie, inventarisatie en restore-stappenplan staan op papier in
 `docs/backup-restore.md`. Open: draaiende Nextcloud + testomgeving voor de daadwerkelijke
@@ -89,14 +91,14 @@ Zie voor de volledige toelichting `docs/roles-security.md` §"Hoe rollen worden 
 - [x] Toelichting per cel toevoegen (zie hierboven) — *waarom* mag/mag een rol iets niet.
 - [x] Vastleggen hoe rollen worden toegekend (zie hierboven en `docs/roles-security.md` §"Hoe rollen worden toegekend").
 - [x] Koppelen met `docs/roles-security.md` — matrix én toelichting zijn nu gespiegeld in beide documenten.
-- [ ] **Te bekijken in Nextcloud:** of de matrix 1-op-1 realiseerbaar is. Toetsingspunten:
-  - [ ] Upload-toegang blokkeren voor de rol **Supportoperator** → via *group folder*-rechten / rolbeperking (Support mag geen content inbrengen).
-  - [ ] Externe links **verplicht met wachtwoord** → Nextcloud *Default public link: disabled* + per-link wachtwoord; openbare delen zonder wachtwoord uitschakelen.
-  - [ ] Per-account quota (standaard **2 GB**) en per-groep quota (**5 GB** via *Group folders*) instelbaar en toetsbaar.
-  - [ ] Logs/monitoring (activity-log, audit-log) beperkt tot **Support/Platformbeheerder** (gebruikersrol geen inzicht).
-  - [ ] MFA (Nextcloud *twofactor_totp* / *twofactor*) **verplicht stelbaar** voor alle rollen.
+- [x] **Te bekijken in Nextcloud:** of de matrix 1-op-1 realiseerbaar is. Toetsingspunten (2026-10-02, zie `evidence/test-results/test-rollenmatrix-1op1.md`):
+  - [x] Upload-toegang blokkeren voor de rol **Supportoperator** → persoonlijk quota op **0 B** (mechanisme geverifieerd via `user:setting test.support files quota 0`).
+  - [x] Externe links **verplicht met wachtwoord** → `share_link_password_default = 1` + `share_link_password_enforced = 1` (geen links zonder wachtwoord meer mogelijk).
+  - [x] Per-account quota (standaard **2 GB**) via `user:setting <uid> files quota 2GB`; per-groep quota (**5 GB**) via `groupfolders:quota <id> 5GB` — beide geverifieerd.
+  - [x] Logs/monitoring beperkt tot **Support/Platformbeheerder** → `admin_audit` app enabled + `log_type_audit_json = 1` + `test.support` subadmin van groep `support` (eindgebruikers geen log-toegang).
+  - [x] MFA **verplicht** voor alle rollen → `twofactorauth:enforce --on` (globaal); `twofactor_enforced = true` in systemconfig.
 
-**Resultaat:** geverifieerde matrix die kan worden getoond tijdens de beoordeling.
+**Resultaat:** ✅ geverifieerde matrix die kan worden getoond tijdens de beoordeling. Bewijs: `evidence/test-results/test-rollenmatrix-1op1.md`.
 
 ---
 
@@ -155,7 +157,7 @@ restore (verplicht voor de acceptatietest).
 | Bestanden (data) | `data/`-map (bijv. `/var/www/html/nextcloud/data`) — individuele + group-folder opslag | ☐ In kaart gebracht |
 | Database | MariaDB/MySQL (`nextcloud`-db) via `mysqldump` (of PostgreSQL via `pg_dump` indien gekozen) | ☐ In kaart gebracht |
 | Configuratie | `config/config.php` (+ `.env` indien aanwezig), keys, quota-instellingen | ☐ In kaart gebracht |
-| Certificaten / TLS | Nginx-certificaat met `IP:10.20.254.141` via interne CA of self-signed testfallback | ◐ Paden en procedure vastgelegd; uitgifte en test ontbreken |
+| Certificaten / TLS | School-goedgekeurde hostnaam, publicatieroute en vertrouwd certificaat voor Nginx | ◐ Paden en procedure vastgelegd; schoolgegevens, uitgifte en test ontbreken |
 | App-instellingen | Geïnstalleerde apps (bv. `antivirus`, `twofactor_totp`, `groupfolders`) + hun config | ☐ In kaart gebracht |
 
 ### 3b. Hoe back-uppen (in overleg met Rol 1 / Infrastructuur)

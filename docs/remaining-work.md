@@ -5,9 +5,9 @@ should be updated after implementation, acceptance testing and review.
 
 ## 1. Repository and coordination
 
-- [ ] Synchronize `infra-hardening` with the latest `main` without losing local
+- [x] Synchronize `infra-hardening` with the latest `main` without losing local
   TLS and documentation work.
-- [ ] Reconcile the checklist and branch analysis with recent Authentik, CI,
+- [x] Reconcile the checklist and branch analysis with recent Authentik, CI,
   quota and roles-matrix work.
 - [ ] Keep secrets, session cookies, app passwords, private keys and `.env`
   values out of Git and test evidence.
@@ -132,7 +132,8 @@ Complete Must requirements first.
 
 ## Recommended execution order
 
-1. Synchronize the repository and preserve current work.
+1. ~~Synchronize the repository and preserve current work.~~ Completed on
+   2026-10-20.
 2. Restrict Authentik/OIDC exposure and finalize allowed networks.
 3. Capture infrastructure, storage, restart and resource evidence.
 4. Complete accounts, storage, groups, quotas, roles and sharing tests.

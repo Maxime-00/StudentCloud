@@ -111,12 +111,12 @@ LMS-sync voor de rol **Gebruiker** verplicht?
 
 | Maatregel | Toelichting | Status |
 |-----------|-------------|--------|
-| MFA voor alle rollen | Verplicht, ook voor beheerders | `☐` te verifiëren |
-| Versleuteling in transit | TLS op Nginx met IP-SAN-certificaat via interne CA; self-signed alleen voor vertrouwde testclients | `☐` te verifiëren |
+| MFA voor alle rollen | Verplicht, ook voor beheerders | ✅ Geverifieerd (2026-10-02, `twofactorauth:enforce --on`) |
+| Versleuteling in transit | TLS op Nginx via de school-goedgekeurde hostnaam, certificaat- en publicatieroute | ◐ Configuratie voorbereid; momenteel HTTP via Nginx op poort 80, activering en bewijs wachten op de school |
 | Versleuteling opslag | Data-at-rest `☐` te bepalen | `☐` |
-| Malware-scan (ClamAV) | Bij upload en periodiek — zie `docs/TODO_security.md` §4 | `☐` |
-| Logging & monitoring | Acties gelogd, inzicht voor Support/Platformbeheerder | `☐` |
-| Back-up & restore | Data + metadata + config, geteste restore — zie `docs/backup-restore.md` | `☐` |
+| Malware-scan (ClamAV) | Bij upload en periodiek — zie `docs/TODO_security.md` §4 | ◐ In uitvoering (installatie) |
+| Logging & monitoring | Acties gelogd, inzicht voor Support/Platformbeheerder | ✅ Geverifieerd (2026-10-02, `admin_audit` + subadmin) |
+| Back-up & restore | Data + metadata + config, geteste restore — zie `docs/backup-restore.md` | ◐ In uitvoering (restore-test open) |
 
 ### Organisatorische maatregelen
 
