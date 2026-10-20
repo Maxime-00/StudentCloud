@@ -12,7 +12,7 @@ configuratie**, plus een **geteste** restore (verplicht voor de acceptatietest).
 | Bestanden (data) | `data/`-map (individuele + group-folder opslag) | Bestandscopie / Restic / BorgBackup |
 | Database (metadata) | MariaDB `nextcloud`-db | `mysqldump` (of `pg_dump`) |
 | Configuratie | `config/config.php` (+ `.env` indien aanwezig), keys, quota-instellingen | Bestandscopie |
-| Certificaten / SSL | reverse-proxy (cert-manager / Let's Encrypt) | Bestandscopie |
+| Certificaten / TLS | Nginx (`/etc/nginx/tls`; interne CA of self-signed testcertificaat) | Certificaat en configuratie kopiëren; private sleutel alleen versleuteld en strikt afgeschermd bewaren |
 | App-instellingen | Geïnstalleerde apps (`antivirus`, `twofactor_totp`, `groupfolders`) + config | In `config.php` / `apps/` |
 
 ### Wanneer en waar

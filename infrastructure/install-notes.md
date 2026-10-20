@@ -10,7 +10,9 @@ Compose. De containerconfiguratie staat in `infrastructure/docker/`:
 
 > **Status:** testomgeving op Ubuntu Server 24.04. Nginx publiceert Nextcloud
 > via HTTP op poort 80; de container zelf luistert alleen op
-> `127.0.0.1:8080`. TLS is nog niet geconfigureerd.
+> `127.0.0.1:8080`. De TLS-configuratie en activeringsprocedure zijn
+> voorbereid voor `10.20.254.141`, maar een intern vertrouwd certificaat en
+> VM-test ontbreken.
 
 ## Huidige infrastructuur
 
@@ -56,8 +58,9 @@ Cron (nc-cron) --------> gedeelde Nextcloud-installatie en datamap
 ```
 
 Nginx gebruikt de configuratie
-`infrastructure/nginx/studentencloud.conf`. HTTPS-publicatie moet nog worden
-bepaald omdat er momenteel geen domeinnaam beschikbaar is.
+`infrastructure/nginx/studentencloud.conf`. De HTTPS-variant gebruikt het
+private IP-adres met bij voorkeur een certificaat van de interne school-CA;
+zie `infrastructure/nginx/TLS.md`.
 
 ## Vereisten
 
@@ -240,9 +243,14 @@ Hiermee worden zowel de bind mount als de herstartbestendigheid getest.
 - De firewallregels zijn `ufw limit 22/tcp`, `ufw allow 80/tcp` en
   `ufw allow 443/tcp`. SSH op poort 22 blijft nodig voor teamleden en
   leerkrachten.
-- Poort 443 is voorbereid voor HTTPS, maar TLS is nog niet geconfigureerd.
-  De HTTPS- en publicatiemethode wordt gekozen zodra er een domeinnaam of een
-  passend alternatief beschikbaar is.
+- Poort 443 is voorbereid voor HTTPS. Omdat er geen domeinnaam komt, gebruikt
+  de configuratie een certificaat met `IP:10.20.254.141` als Subject
+  Alternative Name. De interne school-CA heeft de voorkeur; self-signed is
+  alleen de gedocumenteerde testfallback.
+- Het inzetklare sjabloon staat in
+  `infrastructure/nginx/studentencloud-https.conf.example`. Volg
+  `infrastructure/nginx/TLS.md`; activeer het sjabloon pas nadat het geldige
+  certificaat op de VM aanwezig is.
 
 ## Verificatie
 
@@ -265,6 +273,10 @@ Verwacht resultaat:
 - trusted proxy `172.18.0.1` is ingesteld;
 - Nextcloud is via Nginx bereikbaar op `http://10.20.254.141`;
 - directe toegang tot `10.20.254.141:8080` werkt niet.
+
+Na TLS-activering moeten aanvullend de HTTP-naar-HTTPS-redirect, certificaatnaam,
+TLS-versies en automatische certificaatvernieuwing worden getest volgens
+`infrastructure/nginx/TLS.md`.
 
 ## Problemen oplossen
 

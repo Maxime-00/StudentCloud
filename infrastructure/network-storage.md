@@ -11,13 +11,15 @@ staan in [`docker/docker-compose.yml`](docker/docker-compose.yml).
 | VM | `studentencloud` |
 | Besturingssysteem | Ubuntu Server 24.04 |
 | IP-adres | `10.20.254.141` |
-| Tijdelijke Nextcloud-testpoort | `8080` |
+| Webpublicatie | Nginx op poort `80`; HTTPS op `443` voorbereid |
 | Dataschijf | 200 GB, gemount op `/srv/nextcloud-data` |
 | Uitvoering | Docker Compose |
 
-Nextcloud is tijdens het testen bereikbaar via
-`http://10.20.254.141:8080`. De definitieve reverse-proxy- en TLS-configuratie
-moet nog worden vastgelegd.
+Nextcloud is tijdens het testen via Nginx bereikbaar op
+`http://10.20.254.141`. De containerpoort `8080` is alleen aan
+`127.0.0.1` gekoppeld. Het IP-gebaseerde HTTPS-sjabloon en de
+activeringsprocedure staan in `nginx/`; een intern vertrouwd certificaat en
+VM-test ontbreken.
 
 ## Netwerkconfiguratie
 
@@ -30,11 +32,11 @@ Docker Compose maakt het bridge-netwerk `nc-internal` aan. Daarop draaien:
 - `nc-db`: MariaDB voor metadata;
 - `nc-redis`: Redis voor caching en locking.
 
-Alleen `nc-app` publiceert een hostpoort:
+Alleen `nc-app` publiceert een hostpoort, en uitsluitend op loopback:
 
 ```yaml
 ports:
-  - "${HTTP_PORT:-8080}:80"
+  - "127.0.0.1:${HTTP_PORT:-8080}:80"
 ```
 
 MariaDB en Redis hebben geen `ports`-configuratie en zijn daardoor niet direct
@@ -43,7 +45,8 @@ interne servicenamen `db` en `redis`.
 
 | Verbinding | Van | Naar | Poort | Bereikbaarheid |
 |---|---|---|---|---|
-| Nextcloud-testverkeer | client | `10.20.254.141` | `8080` | intern testnetwerk |
+| Webverkeer | client | Nginx op `10.20.254.141` | `80`; later `443` | intern testnetwerk / goedgekeurd publicatiepad |
+| Proxyverkeer | Nginx | `nc-app` via host-loopback | `127.0.0.1:8080` | alleen op de VM |
 | Nextcloud naar MariaDB | `nc-app` | `nc-db` | `3306` | alleen `nc-internal` |
 | Nextcloud naar Redis | `nc-app` | `nc-redis` | `6379` | alleen `nc-internal` |
 | Cron naar Nextcloud-data | `nc-cron` | gedeelde volumes | niet van toepassing | alleen op de Docker-host |
@@ -119,7 +122,8 @@ docker compose ps
 docker compose exec app getent hosts db redis
 ```
 
-- Controleer dat Nextcloud op `10.20.254.141:8080` bereikbaar is.
+- Controleer dat Nextcloud via Nginx op `10.20.254.141:80` bereikbaar is.
+- Controleer dat `10.20.254.141:8080` niet bereikbaar is vanaf een andere host.
 - Controleer dat `nc-app` de interne namen `db` en `redis` kan vinden.
 - Controleer dat poorten 3306 en 6379 niet op de VM-host zijn gepubliceerd.
 - Controleer bij productie dat alleen de reverse proxy extern bereikbaar is.

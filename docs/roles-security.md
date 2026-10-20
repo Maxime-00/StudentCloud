@@ -112,7 +112,7 @@ LMS-sync voor de rol **Gebruiker** verplicht?
 | Maatregel | Toelichting | Status |
 |-----------|-------------|--------|
 | MFA voor alle rollen | Verplicht, ook voor beheerders | `☐` te verifiëren |
-| Versleuteling in transit | TLS/SSL (Let's Encrypt / cert-manager) | `☐` te verifiëren |
+| Versleuteling in transit | TLS op Nginx met IP-SAN-certificaat via interne CA; self-signed alleen voor vertrouwde testclients | `☐` te verifiëren |
 | Versleuteling opslag | Data-at-rest `☐` te bepalen | `☐` |
 | Malware-scan (ClamAV) | Bij upload en periodiek — zie `docs/TODO_security.md` §4 | `☐` |
 | Logging & monitoring | Acties gelogd, inzicht voor Support/Platformbeheerder | `☐` |

@@ -11,3 +11,8 @@ Thumbs.db
 *.log
 tmp/
 temp/
+
+# TLS private material must stay on the VM, never in Git.
+infrastructure/nginx/certs/
+infrastructure/nginx/*.key
+infrastructure/nginx/*privkey*.pem

@@ -133,10 +133,11 @@ Compose kan draaien.
 6. **Uitbreidbaarheid.** MFA, SSO, Group folders, antivirus en monitoring
    kunnen gericht als apps worden toegevoegd zonder alle functies te activeren.
 
-De huidige testomgeving gebruikt Ubuntu Server 24.04 op VM `studentencloud` en
-publiceert Nextcloud tijdelijk via `10.20.254.141:8080`. MariaDB en Redis zijn
-alleen bereikbaar binnen het interne Docker-netwerk. De 200 GB dataschijf is
-gemonteerd op `/srv/nextcloud-data`.
+De huidige testomgeving gebruikt Ubuntu Server 24.04 op VM `studentencloud`.
+Nginx publiceert Nextcloud via poort 80 en stuurt verkeer lokaal door naar
+`127.0.0.1:8080`; HTTPS is voorbereid maar nog niet geactiveerd. MariaDB en
+Redis zijn alleen bereikbaar binnen het interne Docker-netwerk. De 200 GB
+dataschijf is gemonteerd op `/srv/nextcloud-data`.
 
 ### Risico's en openstaande verificaties
 

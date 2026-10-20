@@ -155,7 +155,7 @@ restore (verplicht voor de acceptatietest).
 | Bestanden (data) | `data/`-map (bijv. `/var/www/html/nextcloud/data`) — individuele + group-folder opslag | ☐ In kaart gebracht |
 | Database | MariaDB/MySQL (`nextcloud`-db) via `mysqldump` (of PostgreSQL via `pg_dump` indien gekozen) | ☐ In kaart gebracht |
 | Configuratie | `config/config.php` (+ `.env` indien aanwezig), keys, quota-instellingen | ☐ In kaart gebracht |
-| Certificaten / SSL | `cert-manager` of `Let's Encrypt` keys (reverse proxy) | ☐ In kaart gebracht |
+| Certificaten / TLS | Nginx-certificaat met `IP:10.20.254.141` via interne CA of self-signed testfallback | ◐ Paden en procedure vastgelegd; uitgifte en test ontbreken |
 | App-instellingen | Geïnstalleerde apps (bv. `antivirus`, `twofactor_totp`, `groupfolders`) + hun config | ☐ In kaart gebracht |
 
 ### 3b. Hoe back-uppen (in overleg met Rol 1 / Infrastructuur)
