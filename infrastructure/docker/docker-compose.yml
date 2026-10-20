@@ -34,6 +34,17 @@ services:
     networks:
       - nc-internal
 
+  # Both app and cron use this scanner via the internal Docker network.
+  clamav:
+    image: clamav/clamav:1.4_base
+    container_name: nc-clamav
+    restart: unless-stopped
+    mem_limit: 4g
+    volumes:
+      - clamav-signatures:/var/lib/clamav
+    networks:
+      - nc-internal
+
   app:
     image: nextcloud:35-apache
     container_name: nc-app
@@ -84,6 +95,7 @@ services:
 volumes:
   db-data:
   nc-html:
+  clamav-signatures:
 
 networks:
   nc-internal:
