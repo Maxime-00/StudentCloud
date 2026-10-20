@@ -9,9 +9,9 @@ configuratie**, plus een **geteste** restore (verplicht voor de acceptatietest).
 
 | Component | Locatie (Nextcloud) | Methode |
 |-----------|---------------------|---------|
-| Bestanden (data) | `data/`-map (individuele + group-folder opslag) | Bestandscopie / Restic / BorgBackup |
-| Database (metadata) | MariaDB `nextcloud`-db | `mysqldump` (of `pg_dump`) |
-| Configuratie | `config/config.php` (+ `.env` indien aanwezig), keys, quota-instellingen | Bestandscopie |
+| Bestanden (data) | `/srv/nextcloud-data/data` (individuele + group-folder opslag) | Bestandssnapshot/-archief; later Restic/BorgBackup |
+| Database (metadata) | MariaDB-container `nc-db`, database uit `MARIADB_DATABASE` | `mariadb-dump` |
+| Configuratie | Docker-volume `docker_nc-html` via `/var/www/html`, inclusief `config/config.php`, apps en themes | Archief vanuit `nc-app`, met de afzonderlijke datamount uitgesloten |
 | Certificaten / SSL | reverse-proxy (cert-manager / Let's Encrypt) | Bestandscopie |
 | App-instellingen | Geïnstalleerde apps (`antivirus`, `twofactor_totp`, `groupfolders`) + config | In `config.php` / `apps/` |
 
@@ -28,18 +28,45 @@ configuratie**, plus een **geteste** restore (verplicht voor de acceptatietest).
 - **Beveiliging:** back-ups versleuteld (Restic/Borg of volume-crypt), alleen Rol 1/3
   heeft back-uprechten; offsite-rechten beperkt.
 
+### Geïmplementeerd back-upscript
+
+[`../scripts/backup-nextcloud.sh`](../scripts/backup-nextcloud.sh) maakt een
+consistente back-up van de huidige Compose-stack. Het script:
+
+- vereist een expliciet, reeds bestaand doelpad;
+- weigert een doel binnen de live Nextcloud-datamap;
+- controleert de datamount en vereiste containers;
+- schakelt onderhoudsmodus tijdelijk in en herstelt de eerdere toestand;
+- maakt een gecomprimeerde MariaDB-dump;
+- archiveert het Nextcloud-volume en de afzonderlijke datamap;
+- bewaart numerieke eigenaars, ACL's en extended attributes voor data;
+- schrijft SHA-256-controlesommen en gesaneerde statusinformatie;
+- laat een onvolledige back-up herkenbaar achter met suffix `.incomplete`.
+
+Voer het script op de VM uit vanuit de repository:
+
+```bash
+sudo ./scripts/backup-nextcloud.sh /pad/naar/gemount-back-updoel
+```
+
+Gebruik voor productie een versleuteld doel buiten de StudentCloud-VM. Een
+map op dezelfde VM is alleen geschikt voor een tijdelijke technische
+restore-oefening en beschermt niet tegen VM- of schijfverlies. Het script raakt
+de Authentik-containers niet; integratie daarvan volgt na afronding van het
+Authentik-werk.
+
 ## Herstelprocedure
 
 Doel: een (verwijderd) bestand **incl. de rechten van die student** terugzetten.
 
-### Volledig herstel (from snapshot)
+### Volledig herstel (uit snapshot)
 
 1. Snapshot van de Proxmox-VM uitkiezen (laatste vóór het verlies).
-2. VM rollen naar de snapshot (of een **klon** van de snapshot starten in een
+2. VM rollen naar de snapshot (of een **kloon** van de snapshot starten in een
    geïsoleerde testomgeving).
 3. Nextcloud starten, verifiëren dat `data/`, `config.php` en de DB consistent zijn.
 
-### Lose bestandsherstel (from Restic/Borg)
+### Los bestandsherstel (uit Restic/Borg)
 
 1. **Testbestand aanmaken:** student uploadt `restore-test.txt` + een groepsmap met
    eigen rechten.
