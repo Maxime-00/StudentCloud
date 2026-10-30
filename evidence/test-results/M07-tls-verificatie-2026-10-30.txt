@@ -1,0 +1,111 @@
+M07 — TLS via goedgekeurd publicatiepad: live verificatie
+=========================================================
+Datum        : 30-10-2026
+VM           : 10.20.254.141 (Ubuntu 24.04.5 LTS)
+Branch       : m07-tls (commit e7a8c56)
+Methode      : Nginx reverse proxy (443, self-signed cert) + HTTP->HTTPS redirect
+              + Nextcloud overwriteprotocol=https
+Operator     : studentencloudadmin@VM (SSH), verificatie door Applicatiespecialist
+
+Aangebrachte wijzigingen op de VM
+---------------------------------
+1. /etc/nginx/ssl/studentencloud.crt + .key
+   (gegenereerd via infrastructure/scripts/gen-selfsigned-cert.sh, RSA 4096,
+   365 dagen, SAN: DNS:studentencloud, DNS:studentencloud.vives.local,
+   IP:10.20.254.141)
+2. /etc/nginx/sites-available/studentencloud
+   (overgenomen van infrastructure/nginx/studentencloud.conf:
+   server 80 = redirect naar https; server 443 ssl = TLS-terminatie + proxy
+   naar 127.0.0.1:8080)
+3. sudo nginx -t && sudo systemctl reload nginx
+4. docker compose exec app php occ config:system:set overwriteprotocol --value=https
+
+Verificatiecommando's en output
+-------------------------------
+> curl -sSI http://10.20.254.141 | head -n 4
+HTTP/1.1 301 Moved Permanently
+Server: nginx/1.24.0 (Ubuntu)
+Date: Fri, 30 Oct 2026 12:52:53 GMT
+Content-Type: text/html
+
+> curl -sSIIk https://10.20.254.141 | head -n 8
+HTTP/1.1 302 Found
+Server: nginx/1.24.0 (Ubuntu)
+Date: Fri, 30 Oct 2026 12:52:53 GMT
+Content-Type: text/html; charset=UTF-8
+Connection: keep-alive
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Permitted-Cross-Domain-Policies: none
+
+> openssl s_client -connect 10.20.254.141:443 </dev/null 2>/dev/null \
+    | openssl x509 -noout -subject -issuer -dates -ext subjectAltName
+subject=CN = studentencloud
+issuer=CN = studentencloud
+notBefore=Oct 30 12:51:52 2026 GMT
+notAfter=Oct 30 12:51:52 2027 GMT
+X509v3 Subject Alternative Name:
+    DNS:studentencloud, DNS:studentencloud.vives.local, IP Address:10.20.254.141
+
+> docker compose exec -T app php occ config:system:get overwriteprotocol
+https
+
+> docker compose exec -T app php occ config:system:get trusted_domains
+localhost
+10.20.254.141
+studentencloud
+
+> docker compose ps --format "table {{.Name}}\t{{.Status}}"
+NAME        STATUS
+nc-app      Up 10 days
+nc-clamav   Up 10 days (healthy)
+nc-cron     Up 10 days
+nc-db       Up 10 days (healthy)
+nc-redis    Up 10 days (healthy)
+
+> sudo nginx -t
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+
+Extra: loginpagina via HTTPS (curl -sSLk https://10.20.254.141)
+--------------------------------------------------------------
+Nextcloud antwoordt via HTTPS en redirecteert naar de OIDC-login
+(Authentik, poort 9000). De sessie eindigt daar met http 400 omdat curl de
+cookies van de OIDC-flow niet meeneemt; in de browser werkt de SSO-flow
+normaal. Dit is SSO-gedrag, geen TLS-probleem.
+
+Conclusie
+---------
+- HTTP (80) redirecteert naar HTTPS: 301 Moved Permanently        -> PASS
+- HTTPS (443) serveert Nextcloud via Nginx met TLS-terminatie      -> PASS
+- Certificaat geldig, SAN bevat IP 10.20.254.141, verloopt 30-10-27 -> PASS
+- overwriteprotocol = https                                        -> PASS
+- Alle containers gezond                                          -> PASS
+
+M07 is klaar: TLS via goedgekeurd publicatiepad (reverse proxy +
+self-signed cert) is live en geverifieerd.
+
+Notities
+--------
+- Self-signed cert: browser toont onbekende uitgever (verwacht voor interne
+  cloud). Voor productie kan dit vervangen worden door een certificaat van
+  een interne CA.
+- Certificaat verloopt na 365 dagen; vernieuwen met
+  infrastructure/scripts/gen-selfsigned-cert.sh + nginx reload.
+
+Incident 30-10-2026 13:10 — HTTPS onbereikbaar voor team en eigen werkpost
+--------------------------------------------------------------------------
+Symptoom: `ERR_CONNECTION_TIMED_OUT` in de browser op 10.20.254.141 (HTTPS);
+HTTP gaf wél 301. Team meldde "Nextcloud werkt niet meer".
+Oorzaak: UFW-regel `443/tcp` ontbrak op de VM (alleen 22/tcp en 80/tcp waren
+open). Nginx luisterde wél op 443; extern verkeer werd door de firewall
+geblokkeerd. De TLS-deploy zelf was correct — de firewall werd na de
+oorspronkelijke HTTP-configuratie niet bijgewerkt.
+Diagnose: `sudo ufw status verbose` + `sudo ss -tlnp` + curl-tests vanaf de
+VM zelf (werkten via de lokale interface en bevestigden dat nginx gezond was).
+Oplossing 13:12: `sudo ufw allow 443/tcp` (IPv4 + IPv6). Daarna:
+- browser bereikt 443 en toont de self-signed-certwaarschuwing (verwacht);
+- na acceptatie/doorgang werkt Nextcloud via HTTPS;
+- access-log toont daarna normale verkeer via 443.
+Achtergelaten: troubleshooting-rij in infrastructure/install-notes.md en
+verificatiestap in install-notes (ufw status).

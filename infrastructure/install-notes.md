@@ -240,9 +240,54 @@ Hiermee worden zowel de bind mount als de herstartbestendigheid getest.
 - De firewallregels zijn `ufw limit 22/tcp`, `ufw allow 80/tcp` en
   `ufw allow 443/tcp`. SSH op poort 22 blijft nodig voor teamleden en
   leerkrachten.
-- Poort 443 is voorbereid voor HTTPS, maar TLS is nog niet geconfigureerd.
-  De HTTPS- en publicatiemethode wordt gekozen zodra er een domeinnaam of een
-  passend alternatief beschikbaar is.
+- **TLS (M07):** de goedgekeurde publicatiemethode is de interne reverse proxy
+  met een **self-signed / interne-CA certificaat** (geen publiek domein).
+
+  1. Genereer het certificaat (eenmalig):
+
+     ```bash
+     sudo bash infrastructure/scripts/gen-selfsigned-cert.sh
+     ```
+
+     Dit legt `studentencloud.key` en `studentencloud.crt` aan in
+     `/etc/nginx/ssl/`, met SAN `DNS:studentencloud` en `IP:10.20.254.141`
+     (365 dagen geldig).
+
+     > **Beveiliging:** de privésleutel (`studentencloud.key`) mag **nooit**
+     > naar de repository of een ander medium. Het certificaat
+     > (`studentencloud.crt`) is openbare informatie en wordt als kopie in
+     > `evidence/certs/` meegeleverd voor de truststore-import op werkposten.
+  2. De Nginx-config (`infrastructure/nginx/studentencloud.conf`) luistert op
+     443 (TLS) en redirecteert alle HTTP (80) naar HTTPS.
+  3. Zet Nextcloud op de HTTPS-protocolovername (bestaande installatie):
+
+     ```bash
+     docker compose exec app php occ config:system:set overwriteprotocol --value=https
+     ```
+
+     `trusted_domains` bevat reeds `10.20.254.141` en `studentencloud`, dus die
+     hoef je niet te wijzigen.
+  4. Herlaad Nginx en controleer:
+
+     ```bash
+     sudo nginx -t && sudo systemctl reload nginx
+     ```
+
+  Het certificaat verloopt na 365 dagen; bij vernieuwing de cert-stap hierboven
+  herhalen. Zolang het certificaat self-signed is, meldt de browser een onbekende
+  uitgever (verwacht voor een interne cloud); éénmalig accepteren.
+
+  **Certificaat in de truststore van een werkpost (optioneel, verwijdert de
+  waarschuwing blijvend):**
+
+  - Certificaat ophalen: `scp studentencloudadmin@10.20.254.141:/etc/nginx/ssl/studentencloud.crt .`
+    (een kopie staat ook in `evidence/certs/studentencloud.crt`)
+  - Windows: dubbelklikken op het `.crt` → tabblad Gecertificeerde autoriteiten
+    → **Certificaat importeren...** → **Lokale computer** → opslag
+    **Gecertificeerde autoriteiten — gelokaliseerd** → voltooi.
+  - Daarna toont de browser bij `https://10.20.254.141` geen waarschuwing meer.
+  - Let op: bij certificaatvernieuwing (jaarlijks) moet de nieuwe versie opnieuw
+    worden gedistribueerd en geïmporteerd.
 
 ## Verificatie
 
@@ -251,6 +296,12 @@ docker compose ps
 docker compose exec app php occ status
 docker compose exec app php occ config:system:get version
 docker compose exec app php occ config:system:get trusted_proxies
+docker compose exec app php occ config:system:get overwriteprotocol
+sudo nginx -t
+curl -sSI http://10.20.254.141 | head -n 3
+curl -sSIIk https://10.20.254.141 | head -n 5
+openssl s_client -connect 10.20.254.141:443 </dev/null 2>/dev/null \
+  | openssl x509 -noout -subject -issuer -dates
 findmnt /srv/nextcloud-data
 df -h /srv/nextcloud-data
 sudo ufw status verbose
@@ -263,7 +314,9 @@ Verwacht resultaat:
 - Nextcloud rapporteert versie 35;
 - `/srv/nextcloud-data` is gemount vanaf de 200 GB-dataschijf;
 - trusted proxy `172.18.0.1` is ingesteld;
-- Nextcloud is via Nginx bereikbaar op `http://10.20.254.141`;
+- HTTP (`http://10.20.254.141`) redirecteert naar HTTPS (`301`);
+- HTTPS (`https://10.20.254.141`) serveert Nextcloud met het self-signed cert;
+- `overwriteprotocol` is `https`;
 - directe toegang tot `10.20.254.141:8080` werkt niet.
 
 ## Problemen oplossen
@@ -274,8 +327,12 @@ Verwacht resultaat:
 | Redis-fout in Nextcloud | Redis is niet gezond of `REDIS_HOST` klopt niet | Controleer `docker compose logs redis` en gebruik servicenaam `redis` |
 | Wachtwoordfout bij een bestaande installatie | `.env` wijkt af van het bestaande `db-data`-volume | Zet de oorspronkelijke waarden terug; verwijder productievolumes niet |
 | Nextcloud meldt een ongeldige host | IP of hostnaam ontbreekt in trusted domains | Controleer `NEXTCLOUD_TRUSTED_DOMAINS` en herstart `app` |
-| `10.20.254.141:8080` is onbereikbaar | Verwacht gedrag: Docker bindt alleen aan localhost | Gebruik `http://10.20.254.141` via Nginx |
+| `10.20.254.141:8080` is onbereikbaar | Verwacht gedrag: Docker bindt alleen aan localhost | Gebruik `https://10.20.254.141` via Nginx |
 | Nginx geeft `502 Bad Gateway` | Nextcloud draait niet of luistert niet op `127.0.0.1:8080` | Controleer `docker compose ps`, logs en de Nginx-configuratie |
+| `nginx -t` faalt op ontbrekend certificaat | Self-signed cert is nog niet gegenereerd | Voer eerst `infrastructure/scripts/gen-selfsigned-cert.sh` uit, daarna `nginx -t` en reload |
+| Browser meldt onbekende certificaatuitgever | Verwacht bij een self-signed cert (interne cloud) | Certificaat éénmalig accepteren; voor productie overwegen interne CA. Voor een blijvende oplossing `studentencloud.crt` importeren in de gelokaliseerde truststore van de werkpost (zie hieronder) |
+| HTTPS geeft `ERR_CONNECTION_TIMED_OUT` maar HTTP wel | UFW-regel voor `443/tcp` ontbreekt (gehad bij TLS-deploy 30-10-2026) | `sudo ufw allow 443/tcp` uitvoeren en `sudo ufw status` controleren; Nginx luistert wél op 443, maar de firewall blokkeerde extern verkeer |
+| Upload van grote bestanden mislukt | PHP-, Apache- of toekomstige proxylimiet is te laag | Controleer `PHP_UPLOAD_LIMIT`, `APACHE_BODY_LIMIT` en proxy-instellingen |
 | Upload van grote bestanden mislukt | PHP-, Apache- of toekomstige proxylimiet is te laag | Controleer `PHP_UPLOAD_LIMIT`, `APACHE_BODY_LIMIT` en proxy-instellingen |
 | Data verschijnt op de systeemschijf | Dataschijf was niet gemount toen Compose startte | Stop Compose, herstel de mount en controleer de data vóór herstart |
 | Cron wordt niet uitgevoerd | `nc-cron` draait niet of Nextcloud staat niet op cronmodus | Controleer de cronlogs en de instelling voor achtergrondtaken |

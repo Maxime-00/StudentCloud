@@ -16,8 +16,10 @@ repository staat nog geen uitvoer van `docker compose ps`, `findmnt` of een
 testresultaat waarmee dit onafhankelijk is bewezen. Deze gegevens moeten dus op
 de VM worden gecontroleerd.
 
-TLS, reverse proxy, ClamAV, monitoring en back-up staan nog in de planning en
-zijn daarom niet als werkende onderdelen in de diagrammen getekend.
+De Nginx reverse proxy (HTTP) en ClamAV staan op de VM. TLS (self-signed
+certificaat) wordt in deze branch aangesloten (M07). Monitoring en back-up
+staan nog in de planning en zijn daarom niet als werkende onderdelen in de
+diagrammen getekend.
 
 ## De onderdelen in gewone taal
 
@@ -37,7 +39,8 @@ Dit diagram toont wat er gebeurt wanneer een gebruiker een bestand uploadt.
 
 ```mermaid
 flowchart LR
-    User[Gebruiker] -->|HTTP via poort 8080| Nextcloud[Nextcloud]
+    User[Gebruiker] -->|HTTPS 443 self-signed cert| Nginx[Nginx reverse proxy]
+    Nginx -->|HTTP 127.0.0.1:8080| Nextcloud[Nextcloud]
     Nextcloud -->|bestand opslaan| Files[200 GB-dataschijf]
     Nextcloud -->|account, rechten en metadata| Database[MariaDB]
     Nextcloud -->|cache en file locking| Redis[Redis]
@@ -46,7 +49,8 @@ flowchart LR
 
 In stappen:
 
-1. De gebruiker opent Nextcloud via `http://10.20.254.141:8080`.
+1. De gebruiker opent Nextcloud via `https://10.20.254.141`; de Nginx-proxy
+   eindigt TLS en doorgeeft naar Nextcloud (HTTP redirecteert naar HTTPS).
 2. Nextcloud controleert het account en de rechten via MariaDB.
 3. De inhoud van een upload gaat naar de 200 GB-dataschijf.
 4. MariaDB bewaart wie de eigenaar is en waar het bestand bij hoort.
@@ -73,10 +77,10 @@ ruimte gebruikt mag worden.
 
 ## Wat komt er later nog bij?
 
-Voor de definitieve omgeving moeten nog worden toegevoegd en getest:
+De reverse proxy (Nginx) en ClamAV draaien al op de VM; TLS (self-signed
+certificaat) wordt in deze branch aangesloten (M07). Voor de definitieve
+omgeving moeten nog worden toegevoegd en getest:
 
-- een reverse proxy met HTTPS/TLS vóór Nextcloud;
-- ClamAV voor controle van uploads;
 - monitoring van bereikbaarheid, opslag, database, certificaat en back-up;
 - een afzonderlijk back-updoel voor bestanden, database en configuratie.
 
@@ -91,8 +95,11 @@ Voer op de VM uit:
 cd infrastructure/docker
 docker compose ps
 docker compose exec app php occ status
+docker compose exec app php occ config:system:get overwriteprotocol
 findmnt /srv/nextcloud-data
 df -h /srv/nextcloud-data
+sudo nginx -t
+curl -sSIIk https://10.20.254.141 | head -n 5
 docker compose port db 3306
 docker compose port redis 6379
 ```
@@ -103,6 +110,7 @@ Het diagram is bevestigd wanneer:
 - Nextcloud versie 35 rapporteert;
 - `/srv/nextcloud-data` werkelijk op de 200 GB-schijf is gemount;
 - MariaDB en Redis geen gepubliceerde hostpoort tonen;
+- HTTPS (443) via Nginx werkt en HTTP (80) redirecteert naar HTTPS;
 - een geüpload testbestand na `docker compose restart` nog aanwezig is.
 
 Bewaar de uitvoer en screenshots in `evidence/test-results/` en

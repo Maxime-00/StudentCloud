@@ -39,10 +39,23 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
+      - name: Generate throwaway test certificate
+        # De live 443-config vermeldt /etc/nginx/ssl/*. Deze tijdelijke (throwaway)
+        # self-signed pair bestaat alleen zodat `nginx -t` de bestanden kan laden.
+        # Ze wordt nergens gedeeld en niet ge-commit.
+        run: |
+          mkdir -p "${RUNNER_TEMP}/nginx-ssl"
+          openssl req -x509 -newkey rsa:2048 -nodes \
+            -keyout "${RUNNER_TEMP}/nginx-ssl/studentencloud.key" \
+            -out "${RUNNER_TEMP}/nginx-ssl/studentencloud.crt" \
+            -days 1 \
+            -subj "/CN=studentencloud" \
+            -addext "subjectAltName=DNS:studentencloud"
       - name: Validate Nginx syntax in an isolated container
         run: |
           docker run --rm --network none \
             --mount "type=bind,source=$PWD/infrastructure/nginx/studentencloud.conf,target=/etc/nginx/conf.d/default.conf,readonly" \
+            --mount "type=bind,source=${RUNNER_TEMP}/nginx-ssl,target=/etc/nginx/ssl,readonly" \
             nginx:1.28.0-alpine nginx -t
 
   documentation:
