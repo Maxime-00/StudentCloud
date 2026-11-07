@@ -1,0 +1,18 @@
+# M11 — Blackbox probe configuratie.
+#
+# https-no-verify:
+#   - Probeert HTTPS met een self-signed cert (insecure_skip_verify).
+#   - probe_ssl_earliest_cert_expiry wordt óók gerapporteerd,
+#     zodat de cert-verloop-alert in alert-rules.yml werkt.
+#   - Status codes 200/301/302/401/403 worden als "up" beschouwd
+#     (301/302 = redirect, 401/403 = SSO-login vereist → server is wel up).
+modules:
+  https-no-verify:
+    prober: http
+    timeout: 10s
+    http:
+      method: GET
+      valid_status_codes: [200, 301, 302, 401, 403]
+      follow_redirects: true
+      tls_config:
+        insecure_skip_verify: true

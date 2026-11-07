@@ -1,0 +1,116 @@
+# M11 — Alertregels voor de 6 gevraagde monitoring-domeinen.
+#
+# Drempels zijn bewust conservatief:
+#   • kritiek  → actie vereist nu (server/DB down)
+#   • hoog     → actie binnen 24 uur (disk vol, cert verlopen, backup oud)
+#   • gemiddeld→ actie binnen week (monitoring-target weg)
+#
+# Alert zichtbaarheid (Level A):
+#   • Prometheus-UI: http://127.0.0.1:9090/alerts
+#   • Upgrade naar e-mail/webhook: zie docs/monitoring.md "Signalering uitbreiden"
+
+groups:
+
+  # ── 1. BEREIKBAARHEID ────────────────────────────────────────────────
+  - name: beschikbaarheid
+    rules:
+      - alert: NextcloudOnbereikbaar
+        expr: probe_success == 0
+        for: 5m
+        labels:
+          severity: kritiek
+        annotations:
+          summary: "Nextcloud onbereikbaar via HTTPS"
+          description: >-
+            De HTTPS-check op {{ $labels.instance }} slaagt al 5 min niet.
+            Check: docker ps | grep nc-app; sudo systemctl status nginx
+
+  # ── 2. OPSLAG ────────────────────────────────────────────────────────
+  - name: opslag
+    rules:
+      - alert: SysteemdiskBijnaVol
+        expr: >
+          (node_filesystem_avail_bytes{fstype!~"tmpfs|devtmpfs"} /
+           node_filesystem_size_bytes{fstype!~"tmpfs|devtmpfs"}) < 0.15
+        for: 5m
+        labels:
+          severity: hoog
+        annotations:
+          summary: "Systeemdisk bijna vol (< 15 % vrij)"
+          description: >-
+            {{ $labels.mountpoint }}: {{ printf "%.1f" ($value * 100) }} % vrij.
+            Check logs en oude back-ups.
+
+      - alert: DataDiskBijnaVol
+        expr: >
+          (node_filesystem_avail_bytes{mountpoint=~"/srv/.*|/var/lib/docker/.*"} /
+           node_filesystem_size_bytes{mountpoint=~"/srv/.*|/var/lib/docker/.*"}) < 0.20
+        for: 10m
+        labels:
+          severity: hoog
+        annotations:
+          summary: "Nexcloud-datavolume bijna vol (< 20 % vrij)"
+          description: >-
+            {{ $labels.mountpoint }}: {{ printf "%.1f" ($value * 100) }} % vrij.
+            Controleer quota's en archiveren.
+
+  # ── 3. FOUTEN (monitoring-infra zelf) ───────────────────────────────
+  - name: fouten
+    rules:
+      - alert: MonitoringTargetDown
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: gemiddeld
+        annotations:
+          summary: "Monitoring-target {{ $labels.job }} onbereikbaar"
+          description: >-
+            {{ $labels.job }} ({{ $labels.instance }}) reageert niet al 5 min.
+            Check: docker ps | grep {{ $labels.job }}
+
+  # ── 4. DATABASE ─────────────────────────────────────────────────────
+  - name: database
+    rules:
+      - alert: MariaDBDown
+        expr: mysql_up == 0
+        for: 3m
+        labels:
+          severity: kritiek
+        annotations:
+          summary: "MariaDB onbereikbaar"
+          description: >-
+            MariaDB reageert niet al 3 min.
+            Check: docker logs nc-db --tail 30
+
+  # ── 5. CERTIFICAAT ──────────────────────────────────────────────────
+  # probe_ssl_earliest_cert_expiry is een Unix-tijd; 30 * 86400 = 30 dagen.
+  - name: certificaat
+    rules:
+      - alert: CertBijnaVerlopen
+        expr: probe_ssl_earliest_cert_expiry - time() < 30 * 86400
+        for: 1h
+        labels:
+          severity: hoog
+        annotations:
+          summary: "TLS-certificaat loopt < 30 dagen verlopen"
+          description: >-
+            Verloop over {{ printf "%.0f" (probe_ssl_earliest_cert_expiry - time()) / 86400 }} dagen.
+            Vernieuw: sudo bash infrastructure/scripts/gen-selfsigned-cert.sh
+
+  # ── 6. BACK-UP ──────────────────────────────────────────────────────
+  # Wordt pas actief nadat M10 een marker-file schrijft naar
+  # /srv/nextcloud-data/.last-backup-marker.
+  # Het script backup-check.sh leest die marker en publiceert
+  # backup_last_success_timestamp_seconds via node_exporter textfile.
+  - name: backup
+    rules:
+      - alert: BackupTeOud
+        expr: time() - backup_last_success_timestamp_seconds > 86400
+        for: 1h
+        labels:
+          severity: hoog
+        annotations:
+          summary: "Laatste back-up ouder dan 24 uur"
+          description: >-
+            Laatste back-up was {{ printf "%.0f" (time() - backup_last_success_timestamp_seconds) / 3600 }} uur geleden.
+            Controleer back-upprocedure (M10).

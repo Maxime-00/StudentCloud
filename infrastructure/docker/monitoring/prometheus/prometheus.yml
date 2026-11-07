@@ -1,0 +1,56 @@
+# M11 — Prometheus scrape-configuratie voor StudentCloud.
+# Draait op de VM; scrapes elke 30 s alle monitoring-targets.
+#
+# Target-overzicht:
+#   node          → node_exporter (host network)    via host.docker.internal:9100
+#   mysqld        → mysqld_exporter (nc-internal)   via container-naam
+#   blackbox      → blackbox_exporter (host network) via host.docker.internal:9115
+#                    probeert https://127.0.0.1:443/status.php (Nextcloud health endpoint)
+#   prometheus    → zichzelf
+
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+rule_files:
+  - "alert-rules.yml"
+
+scrape_configs:
+
+  # Prometheus zelf (up/down check)
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # VM-host metrics: disk, CPU, RAM, filesystem
+  - job_name: "node"
+    static_configs:
+      - targets: ["host.docker.internal:9100"]
+        labels:
+          instance: "studentencloud-vm"
+
+  # MariaDB metrics: up, slow queries, connection count
+  - job_name: "mysqld"
+    static_configs:
+      - targets: ["mon-mysqld-exporter:9104"]
+        labels:
+          instance: "nc-db"
+
+  # HTTPS-bereikbaarheid van Nextcloud (via blackbox probe).
+  # Geeft ook probe_ssl_earliest_cert_expiry → cert-verloop-alert.
+  - job_name: "blackbox-https"
+    metrics_path: /probe
+    params:
+      module: [https-no-verify]
+    static_configs:
+      - targets:
+          - "https://127.0.0.1:443/status.php"
+        labels:
+          instance: "studentencloud-https"
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: host.docker.internal:9115

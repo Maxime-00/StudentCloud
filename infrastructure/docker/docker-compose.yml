@@ -92,10 +92,87 @@ services:
     networks:
       - nc-internal
 
+  # ── M11 — Monitoring ─────────────────────────────────────────────────
+  # node_exporter + blackbox: host networking (host metrics + 127.0.0.1:443 probe)
+  # mysqld_exporter: nc-internal netwerk (reach nc-db via container-naam)
+  # prometheus: nc-internal + extra_hosts voor host.docker.internal
+  # Prometheus-UI: http://127.0.0.1:9090 (alleen lokaal op de VM)
+
+  mon-node-exporter:
+    image: prom/node-exporter:v1.8.1
+    container_name: mon-node-exporter
+    restart: unless-stopped
+    network_mode: host
+    pid: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/host/root:ro
+      - /etc/node_exporter/textfile_collector:/etc/node_exporter/textfile_collector:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--path.rootfs=/host/root"
+      - "--collector.textfile.directory=/etc/node_exporter/textfile_collector"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+    labels:
+      com.dabbi.docker.nonessential: "true"
+
+  mon-blackbox:
+    image: prom/blackbox-exporter:v0.26.0
+    container_name: mon-blackbox
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./monitoring/blackbox.yml:/config/blackbox.yml:ro
+    command:
+      - "--config.file=/config/blackbox.yml"
+    labels:
+      com.dabbi.docker.nonessential: "true"
+
+  mon-mysqld-exporter:
+    image: prom/mysqld-exporter:v0.15.1
+    container_name: mon-mysqld-exporter
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: "${DB_USER}:${DB_PASSWORD}@db:3306/"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - nc-internal
+    labels:
+      com.dabbi.docker.nonessential: "true"
+
+  mon-prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: mon-prometheus
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+      - mon-prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d"
+      - "--web.enable-lifecycle"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - mon-mysqld-exporter
+    networks:
+      - nc-internal
+    labels:
+      com.dabbi.docker.nonessential: "true"
+
 volumes:
   db-data:
   nc-html:
   clamav-signatures:
+  mon-prometheus-data:
 
 networks:
   nc-internal:
