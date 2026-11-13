@@ -1,0 +1,105 @@
+# Independent project: starting monitoring never recreates Nextcloud or MariaDB.
+name: studentcloud-monitoring
+services:
+  mon-node-exporter:
+    image: prom/node-exporter:v1.8.1
+    container_name: mon-node-exporter
+    restart: unless-stopped
+    networks: [monitoring]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    mem_limit: 128m
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - type: bind
+        source: /
+        target: /host/root
+        read_only: true
+        bind:
+          propagation: rslave
+      - ${MONITORING_TEXTFILE_DIRECTORY:-./textfile}:/etc/node_exporter/textfile_collector:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--path.rootfs=/host/root"
+      - "--collector.textfile.directory=/etc/node_exporter/textfile_collector"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+    labels:
+      com.dabbi.docker.nonessential: "true"
+
+  mon-blackbox:
+    image: prom/blackbox-exporter:v0.26.0
+    container_name: mon-blackbox
+    restart: unless-stopped
+    networks: [monitoring]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    mem_limit: 64m
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./blackbox.yml:/config/blackbox.yml:ro
+      - type: bind
+        source: ${MONITORING_TLS_CERTIFICATE:-/etc/nginx/ssl/studentencloud.crt}
+        target: /config/studentencloud.crt
+        read_only: true
+        bind:
+          create_host_path: false
+    command:
+      - "--config.file=/config/blackbox.yml"
+    labels:
+      com.dabbi.docker.nonessential: "true"
+
+  mon-mysqld-exporter:
+    image: prom/mysqld-exporter:v0.15.1
+    container_name: mon-mysqld-exporter
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    mem_limit: 96m
+    environment:
+      MYSQLD_EXPORTER_PASSWORD: ${MONITORING_DB_PASSWORD:-}
+    command:
+      - "--config.my-cnf=/dev/null"
+      - "--mysqld.address=db:3306"
+      - "--mysqld.username=studentcloud_monitor"
+    networks:
+      - nc-internal
+      - monitoring
+    labels:
+      com.dabbi.docker.nonessential: "true"
+
+  mon-prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: mon-prometheus
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    mem_limit: 256m
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+      - mon-prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d"
+      - "--storage.tsdb.retention.size=1GB"
+    depends_on:
+      - mon-mysqld-exporter
+    networks:
+      - monitoring
+    labels:
+      com.dabbi.docker.nonessential: "true"
+
+volumes:
+  mon-prometheus-data:
+networks:
+  monitoring:
+    driver: bridge
+  nc-internal:
+    external: true
+    name: ${NEXTCLOUD_DOCKER_NETWORK:-docker_nc-internal}
