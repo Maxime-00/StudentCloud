@@ -1,0 +1,65 @@
+{
+    "target":  "10.20.254.141",
+    "source":  "Timo workstation over its current network path",
+    "captured_at":  "2026-11-13T14:09:26.5950943Z",
+    "timeout_ms":  1500,
+    "ports":  [
+                  {
+                      "port":  22,
+                      "reachable":  true
+                  },
+                  {
+                      "port":  80,
+                      "reachable":  true
+                  },
+                  {
+                      "port":  443,
+                      "reachable":  true
+                  },
+                  {
+                      "port":  8080,
+                      "reachable":  false
+                  },
+                  {
+                      "port":  8089,
+                      "reachable":  true
+                  },
+                  {
+                      "port":  9000,
+                      "reachable":  true
+                  },
+                  {
+                      "port":  9443,
+                      "reachable":  true
+                  },
+                  {
+                      "port":  3306,
+                      "reachable":  false
+                  },
+                  {
+                      "port":  6379,
+                      "reachable":  false
+                  },
+                  {
+                      "port":  5432,
+                      "reachable":  false
+                  },
+                  {
+                      "port":  9090,
+                      "reachable":  false
+                  },
+                  {
+                      "port":  9100,
+                      "reachable":  false
+                  },
+                  {
+                      "port":  9104,
+                      "reachable":  false
+                  },
+                  {
+                      "port":  9115,
+                      "reachable":  false
+                  }
+              ],
+    "limitation":  "A timeout is not proof of firewall policy or of reachability from every network."
+}

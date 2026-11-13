@@ -1,6 +1,8 @@
 # Acceptatietests
 
-Dit plan vertaalt de acht scenario's uit de [officiële opdracht](https://github.com/MathieuLeroy2/network-experience-2627/blob/main/projecten/09-studentencloud.md). AT-Q1 heeft een uitvoeringsverslag; het antivirusdeel van AT05 is geslaagd op 13 november 2026. De overige scenario's en de uploadlimiettest vereisen nog uitvoering. De overige Musts vereisen aanvullend bewijs volgens [PROJECT_CHECKLIST.md](../PROJECT_CHECKLIST.md).
+Dit plan vertaalt de acht scenario's uit de [officiële opdracht](https://github.com/MathieuLeroy2/network-experience-2627/blob/main/projecten/09-studentencloud.md). AT-Q1 heeft deelresultaten; het antivirusdeel van AT05 is geslaagd op 13 november 2026. De acht hoofdscenario's hebben nog geen volledige acceptatie: onder andere de uploadlimiettest van AT05 ontbreekt. Zie [PROJECT_CHECKLIST.md](../PROJECT_CHECKLIST.md) en de [audit van 13 november](../evidence/test-results/checklist-audit-2026-11-13.md) voor bewijs en resterende stappen.
+
+> **Audit 13-11-2026:** AT-Q1 bewijst configuratie van quota en een persoonlijke uploadafwijzing. Het oorspronkelijke volledige scenario is niet geslaagd aangetoond: het supportplafond is beleid in plaats van een technisch afgedwongen maximum, een echte groepsoverschrijding is niet getest en een bijna-vol-waarschuwing ontbreekt als bewijs. Oude configuratieclaims moeten ook tegen de huidige VM worden getoetst; de lokale beheerder heeft momenteel geen MFA ingeschakeld.
 
 ## Testvoorwaarden
 
@@ -55,7 +57,7 @@ Dit plan vertaalt de acht scenario's uit de [officiële opdracht](https://github
 - Screenshot: upload geblokkt op het bereikte quota.
 - Log-/monitoring-uitdruk van de verdeelde subtotalen.
 
-**Status:** ✅ Uitgevoerd (2026-10-02)
+**Status:** 🟨 Deels uitgevoerd (2026-10-02), opnieuw beoordeeld op 2026-11-13; zie afwijkingen hierboven.
 
 ## Resultaten
 
@@ -65,7 +67,7 @@ Een testplan is nog geen testresultaat. Een requirement wordt pas **Klaar** na g
 
 | Test | Resultaat | Datum | Beoordelaar | Bewijs |
 |------|-----------|-------|-------------|--------|
-| AT-Q1 — Quota per groep (2 GB / 5 GB) | ✅ Geslaagd | 2026-10-02 | Rol 3 (Security) | `evidence/test-results/test-at-q1-quota.md` |
+| AT-Q1 — Quota per groep (2 GB / 5 GB) | 🟨 Deelresultaat; volledige acceptatie ontbreekt | 2026-10-02, audit 2026-11-13 | Historisch: Rol 3; audit voor Timo | `evidence/test-results/test-at-q1-quota.md`; `evidence/test-results/checklist-audit-2026-11-13.md` |
 | AT05 — Antivirusdeel (M09) | ✅ EICAR gedetecteerd, upload geblokkeerd (HTTP 415); M17 nog te testen | 2026-11-13 | Beoordeeld op aangeleverde terminaluitvoer en logscreenshot | [Testverslag](../evidence/test-results/AT05-eicar-2026-11-13.md) |
 
 ### AT-Q1 — Uitvoeringsverslag (2026-10-02)

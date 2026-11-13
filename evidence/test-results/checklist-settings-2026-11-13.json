@@ -1,0 +1,332 @@
+{
+  "captured_at": "2026-11-13T14:11:11.615905+00:00",
+  "method": "read-only configuration and service inspection; no logins, uploads, deletions or restores",
+  "nextcloud_status": {
+    "installed": true,
+    "version": "35.0.1.1",
+    "versionstring": "35.0.1",
+    "edition": "",
+    "maintenance": false,
+    "needsDbUpgrade": false,
+    "productname": "Nextcloud",
+    "extendedSupport": false
+  },
+  "enabled_apps": {
+    "activity": "8.0.0",
+    "admin_audit": "2.0.0-dev.0",
+    "app_api": "35.0.0",
+    "appstore": "2.0.0-dev.0",
+    "bruteforcesettings": "8.0.0",
+    "circles": "35.0.0",
+    "cloud_federation_api": "2.0.0-dev.0",
+    "comments": "2.0.0-dev.0",
+    "contactsinteraction": "2.0.0-dev.0",
+    "dashboard": "8.0.0-dev.0",
+    "dav": "2.0.0-dev.1",
+    "federatedfilesharing": "2.0.0-dev.1",
+    "federation": "2.0.0-dev.0",
+    "files": "3.0.0-dev.0",
+    "files_antivirus": "6.4.1",
+    "files_downloadlimit": "5.3.0",
+    "files_lock": "35.0.0",
+    "files_pdfviewer": "8.0.0",
+    "files_reminders": "2.0.0-dev.0",
+    "files_sharing": "2.0.0-dev.1",
+    "files_trashbin": "2.0.0-dev.0",
+    "files_versions": "2.0.0-dev.0",
+    "firstrunwizard": "8.0.0",
+    "groupfolders": "23.0.1",
+    "logreader": "8.0.0",
+    "lookup_server_connector": "2.0.0-dev.0",
+    "nextcloud_announcements": "7.0.0",
+    "notifications": "8.0.0",
+    "oauth2": "2.0.0-dev.0",
+    "office": "1.1.0",
+    "password_policy": "7.0.0",
+    "photos": "8.0.0",
+    "privacy": "7.0.0",
+    "profile": "2.0.0-dev.0",
+    "provisioning_api": "2.0.0-dev.0",
+    "recommendations": "8.0.0",
+    "related_resources": "6.0.0",
+    "serverinfo": "7.0.0",
+    "settings": "2.0.0-dev.0",
+    "sharebymail": "2.0.0-dev.0",
+    "sharing": "1.0.4",
+    "support": "7.0.0",
+    "survey_client": "7.0.0",
+    "systemtags": "2.0.0-dev.0",
+    "text": "9.0.0",
+    "theming": "3.0.0-dev.0",
+    "twofactor_backupcodes": "2.0.0-dev.0",
+    "updatenotification": "2.0.0-dev.0",
+    "user_oidc": "8.11.0",
+    "user_status": "2.0.0-dev.0",
+    "viewer": "8.0.0",
+    "weather_status": "2.0.0-dev.0",
+    "webhook_listeners": "2.0.0-dev.0",
+    "workflowengine": "3.0.0-dev.0"
+  },
+  "disabled_app_ids": [
+    "encryption",
+    "files_external",
+    "suspicious_login",
+    "twofactor_nextcloud_notification",
+    "twofactor_totp",
+    "user_ldap"
+  ],
+  "system_settings": {
+    "version": "35.0.1.1",
+    "maintenance": false,
+    "overwriteprotocol": "https",
+    "overwrite.cli.url": "http://localhost",
+    "trusted_proxies": "***REMOVED SENSITIVE VALUE***",
+    "trusted_domains": [
+      "localhost",
+      "10.20.254.141",
+      "studentencloud"
+    ],
+    "twofactor_enforced": "<unset>",
+    "twofactor_enforced_groups": [],
+    "twofactor_enforced_excluded_groups": [],
+    "trashbin_retention_obligation": "<unset>",
+    "versions_retention_obligation": "<unset>",
+    "versions_retention_max_number": "<unset>",
+    "share_link_password_default": "1",
+    "share_link_password_enforced": "1",
+    "default_quota": "<unset>",
+    "log_type": "<unset>",
+    "loglevel": "<unset>",
+    "auth.bruteforce.protection.enabled": "<unset>"
+  },
+  "application_settings": {
+    "core": {
+      "backgroundjobs_mode": "cron",
+      "shareapi_enabled": "<unset>",
+      "shareapi_allow_links": "<unset>",
+      "shareapi_allow_public_upload": "<unset>",
+      "shareapi_enforce_links_password": true,
+      "shareapi_default_expire_date": true,
+      "shareapi_expire_after_n_days": "<unset>",
+      "shareapi_enforce_expire_date": true,
+      "shareapi_default_internal_expire_date": "yes",
+      "shareapi_enforce_internal_expire_date": "yes"
+    },
+    "files_antivirus": {
+      "av_mode": "daemon",
+      "av_host": "clamav",
+      "av_port": 3310,
+      "av_stream_max_length": 26214400,
+      "av_max_file_size": -1,
+      "av_infected_action": "only_log",
+      "av_scan_background": "<unset>"
+    },
+    "files": {
+      "default_quota": "2 GB"
+    },
+    "quota_warning": {
+      "first_notification": "<unset>",
+      "second_notification": "<unset>",
+      "final_notification": "<unset>"
+    },
+    "user_oidc": {
+      "allow_multiple_user_backends": "0",
+      "auto_provision": "<unset>",
+      "soft_auto_provision": "<unset>"
+    }
+  },
+  "user_count": 6,
+  "test_accounts": {
+    "ncadmin": {
+      "enabled": true,
+      "quota": "2 GB",
+      "groups": [
+        "admin"
+      ],
+      "backend": "Database",
+      "user_id": "ncadmin",
+      "storage": {
+        "free": 2081835980,
+        "used": 65647668,
+        "total": 2147483648,
+        "relative": 3.06,
+        "quota": 2147483648
+      }
+    },
+    "test.gebruiker": {
+      "unverified": true,
+      "exit_code": 1
+    },
+    "test.groepsbeheer": {
+      "unverified": true,
+      "exit_code": 1
+    },
+    "test.support": {
+      "unverified": true,
+      "exit_code": 1
+    }
+  },
+  "admin_mfa_state": "Two-factor authentication is not enabled for user ncadmin\n\nDisabled providers:\n- backup_codes\n- totp",
+  "groupfolders": [
+    {
+      "id": 1,
+      "quota": 5368709120,
+      "acl": true,
+      "acl_default_no_permission": false,
+      "groups": {
+        "groepsbeheerders": {
+          "displayName": "groepsbeheerders",
+          "permissions": 1,
+          "type": "group"
+        }
+      },
+      "manage": [],
+      "options": {
+        "separate-storage": true
+      },
+      "team_circle_id": null,
+      "size": 0,
+      "groups_list": {
+        "groepsbeheerders": 1
+      },
+      "mountPoint": "ProjectgroepA",
+      "rootId": 120,
+      "storageId": 6
+    }
+  ],
+  "containers": {
+    "nc-app": {
+      "image": "nextcloud:35-apache",
+      "running": true,
+      "health": "no-healthcheck",
+      "ports": {
+        "80/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "8080"
+          }
+        ]
+      },
+      "upload_limits": [
+        "APACHE_BODY_LIMIT=2147483648",
+        "PHP_UPLOAD_LIMIT=2G"
+      ],
+      "mounts": [
+        {
+          "Type": "volume",
+          "Name": "docker_nc-html",
+          "Source": "/var/lib/docker/volumes/docker_nc-html/_data",
+          "Destination": "/var/www/html",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Name": null,
+          "Source": "/srv/nextcloud-data/data",
+          "Destination": "/var/www/html/data",
+          "RW": true
+        }
+      ]
+    },
+    "nc-db": {
+      "image": "mariadb:11.8",
+      "running": true,
+      "health": "healthy",
+      "ports": {}
+    },
+    "nc-redis": {
+      "image": "redis:7-alpine",
+      "running": true,
+      "health": "healthy",
+      "ports": {}
+    },
+    "nc-cron": {
+      "image": "nextcloud:35-apache",
+      "running": true,
+      "health": "no-healthcheck",
+      "ports": {}
+    },
+    "nc-clamav": {
+      "image": "clamav/clamav:1.4_base",
+      "running": true,
+      "health": "healthy",
+      "ports": {}
+    },
+    "authentik-server-1": {
+      "image": "ghcr.io/goauthentik/server:2026.5.3",
+      "running": true,
+      "health": "healthy",
+      "ports": {
+        "9000/tcp": [
+          {
+            "HostIp": "",
+            "HostPort": "9000"
+          }
+        ],
+        "9443/tcp": [
+          {
+            "HostIp": "",
+            "HostPort": "9443"
+          }
+        ]
+      }
+    },
+    "authentik-oidc-client-1": {
+      "image": "python:3.12-alpine",
+      "running": true,
+      "health": "no-healthcheck",
+      "ports": {
+        "8080/tcp": [
+          {
+            "HostIp": "",
+            "HostPort": "8089"
+          }
+        ]
+      }
+    },
+    "mon-prometheus": {
+      "image": "prom/prometheus:v2.53.0",
+      "running": true,
+      "health": "no-healthcheck",
+      "ports": {
+        "9090/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "9090"
+          }
+        ]
+      }
+    }
+  },
+  "recent_error_classes": [
+    {
+      "app": "files_antivirus",
+      "exception_class": "unspecified",
+      "count": 1
+    },
+    {
+      "app": "no app in context",
+      "exception_class": "OCP\\Files\\InvalidContentException",
+      "count": 1
+    },
+    {
+      "app": "webdav",
+      "exception_class": "OCA\\DAV\\Connector\\Sabre\\Exception\\UnsupportedMediaType",
+      "count": 1
+    }
+  ],
+  "disk_capacity": "Filesystem                         Size  Used Avail Use% Mounted on\n/dev/mapper/ubuntu--vg-ubuntu--lv   29G   23G  4.7G  83% /\n/dev/sdb1                          196G  1.3G  185G   1% /srv/nextcloud-data",
+  "mount": "/srv/nextcloud-data /dev/sdb1 ext4",
+  "system_services": "active\nactive\nactive",
+  "backup_marker_mtime": "2026-11-13 13:47:41.538889301 +0000",
+  "operator_backup_cron_present": false,
+  "root_backup_cron": "not inspected: sudo requires interactive authentication",
+  "effective_php_limits": {
+    "upload_max_filesize": "2G",
+    "post_max_size": "2G"
+  },
+  "recent_error_indicators": {
+    "eicar_test_indicator": 3,
+    "malware_detection_indicator": 1
+  }
+}
