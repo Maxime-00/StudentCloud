@@ -67,6 +67,7 @@ De [officiële opdracht](https://github.com/MathieuLeroy2/network-experience-262
 - [Installatienotities](infrastructure/install-notes.md) en [netwerk en opslag](infrastructure/network-storage.md).
 - [Acceptatietests](docs/acceptance-tests.md) en bewijsstukken in [evidence/](evidence/).
 - [Automatische controles (CI)](docs/ci.md): Compose, Nginx, lokale documentlinks en secrets bij pull requests.
+- [Monitoring](docs/monitoring.md): onafhankelijke Prometheus-stack, HTTPS-, database-, opslag-, container-, fout- en back-upcontroles.
 
 ## Aan de slag
 

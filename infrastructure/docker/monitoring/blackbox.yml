@@ -1,0 +1,20 @@
+modules:
+  nextcloud-https:
+    prober: http
+    timeout: 10s
+    http:
+      method: GET
+      preferred_ip_protocol: ip4
+      valid_status_codes: [200]
+      follow_redirects: false
+      fail_if_not_ssl: true
+      headers:
+        Host: 10.20.254.141
+      fail_if_body_not_matches_regexp:
+        - '"installed"\s*:\s*true'
+        - '"maintenance"\s*:\s*false'
+        - '"needsDbUpgrade"\s*:\s*false'
+      tls_config:
+        ca_file: /config/studentencloud.crt
+        server_name: 10.20.254.141
+        min_version: TLS12

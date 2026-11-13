@@ -1,0 +1,21 @@
+{
+  "started_at": "2026-11-13T13:17:06.783759+00:00",
+  "test": "Stop only mon-mysqld-exporter; expect MonitoringTargetDown, then recovery",
+  "database_started_at_before": "2026-11-13T12:53:08.087146003Z",
+  "fired_at": "2026-11-13T13:20:48.062254+00:00",
+  "firing_alerts": [
+    {
+      "labels": {
+        "alertname": "MonitoringTargetDown",
+        "instance": "nc-db",
+        "job": "mysqld",
+        "severity": "hoog"
+      },
+      "state": "firing"
+    }
+  ],
+  "recovered_at": "2026-11-13T13:21:19.273199+00:00",
+  "remaining_test_alerts": 0,
+  "database_started_at_after": "2026-11-13T12:53:08.087146003Z",
+  "verdict": "PASS"
+}

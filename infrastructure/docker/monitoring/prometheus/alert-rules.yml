@@ -1,0 +1,122 @@
+groups:
+  - name: beschikbaarheid
+    rules:
+      - alert: NextcloudOnbereikbaar
+        expr: probe_success{job="blackbox-https"} == 0
+        for: 5m
+        labels:
+          severity: kritiek
+        annotations:
+          summary: Nextcloud HTTPS health check fails
+          description: Check Nginx, certificate trust and Nextcloud status/maintenance mode.
+      - alert: ContainerNietGezond
+        expr: studentcloud_container_healthy == 0
+        for: 3m
+        labels:
+          severity: kritiek
+        annotations:
+          summary: 'Container {{ $labels.container }} is missing, stopped or unhealthy'
+  - name: opslag
+    rules:
+      - alert: SysteemdiskBijnaVol
+        expr: node_filesystem_avail_bytes{job="node",mountpoint="/"} / node_filesystem_size_bytes{job="node",mountpoint="/"} < 0.15
+        for: 5m
+        labels:
+          severity: hoog
+        annotations:
+          summary: System disk has less than 15 percent free
+      - alert: DataDiskBijnaVol
+        expr: node_filesystem_avail_bytes{job="node",mountpoint="/srv/nextcloud-data"} / node_filesystem_size_bytes{job="node",mountpoint="/srv/nextcloud-data"} < 0.20
+        for: 10m
+        labels:
+          severity: hoog
+        annotations:
+          summary: Nextcloud data disk has less than 20 percent free
+      - alert: DataMountOntbreekt
+        expr: absent(node_filesystem_size_bytes{job="node",mountpoint="/srv/nextcloud-data"})
+        for: 5m
+        labels:
+          severity: kritiek
+        annotations:
+          summary: Dedicated Nextcloud data mount is missing from host metrics
+  - name: fouten
+    rules:
+      - alert: MonitoringTargetDown
+        expr: up == 0
+        for: 3m
+        labels:
+          severity: hoog
+        annotations:
+          summary: 'Cannot scrape {{ $labels.job }} ({{ $labels.instance }})'
+      - alert: MonitoringJobOntbreekt
+        expr: absent(up{job="node"}) or absent(up{job="mysqld"}) or absent(up{job="blackbox"}) or absent(up{job="blackbox-https"})
+        for: 3m
+        labels:
+          severity: hoog
+        annotations:
+          summary: 'Expected monitoring job {{ $labels.job }} is missing'
+      - alert: HostCollectorVerouderd
+        expr: time() - studentcloud_collector_timestamp_seconds > 600 or absent(studentcloud_collector_timestamp_seconds)
+        for: 5m
+        labels:
+          severity: hoog
+        annotations:
+          summary: Host container/log collector has not reported for ten minutes
+      - alert: NextcloudLogNietLeesbaar
+        expr: studentcloud_nextcloud_log_readable == 0
+        for: 5m
+        labels:
+          severity: hoog
+        annotations:
+          summary: Cannot read the configured Nextcloud JSON log
+      - alert: NextcloudFouten
+        expr: studentcloud_nextcloud_recent_errors > 0
+        for: 2m
+        labels:
+          severity: hoog
+        annotations:
+          summary: Nextcloud logged errors in the last fifteen minutes
+          description: Review the restricted Nextcloud log on the VM; log contents are not exported.
+      - alert: NextcloudLogFormaat
+        expr: studentcloud_nextcloud_log_invalid_lines > 0
+        for: 5m
+        labels:
+          severity: hoog
+        annotations:
+          summary: Nextcloud log contains unparseable records; error counts may be incomplete
+  - name: database
+    rules:
+      - alert: MariaDBDown
+        expr: mysql_up{job="mysqld"} == 0
+        for: 3m
+        labels:
+          severity: kritiek
+        annotations:
+          summary: MariaDB is unavailable to its monitoring account
+  - name: certificaat
+    rules:
+      - alert: CertBijnaVerlopen
+        expr: probe_ssl_earliest_cert_expiry{job="blackbox-https"} - time() < 30 * 86400
+        for: 1h
+        labels:
+          severity: hoog
+        annotations:
+          summary: TLS certificate expires within thirty days or has expired
+          description: 'Remaining validity: {{ $value | humanizeDuration }}. Renew and reload Nginx/blackbox.'
+  - name: backup
+    rules:
+      - alert: BackupTeOud
+        expr: time() - backup_last_success_timestamp_seconds > 86400
+        for: 1h
+        labels:
+          severity: hoog
+        annotations:
+          summary: No completed backup in the last twenty-four hours
+          description: No recent successful backup marker. A timestamp of zero means none has been recorded.
+      - alert: BackupMetricOntbreekt
+        expr: absent(backup_last_success_timestamp_seconds) or absent(backup_check_timestamp_seconds) or time() - backup_check_timestamp_seconds > 900
+        for: 5m
+        labels:
+          severity: hoog
+        annotations:
+          summary: Backup collector metrics are missing or stale

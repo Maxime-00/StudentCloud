@@ -1,0 +1,234 @@
+{
+  "captured_at": "2026-11-13T13:21:40.558842+00:00",
+  "verdict": "PASS",
+  "failures": [],
+  "targets": [
+    {
+      "job": "blackbox",
+      "health": "up",
+      "error": ""
+    },
+    {
+      "job": "blackbox-https",
+      "health": "up",
+      "error": ""
+    },
+    {
+      "job": "mysqld",
+      "health": "up",
+      "error": ""
+    },
+    {
+      "job": "node",
+      "health": "up",
+      "error": ""
+    },
+    {
+      "job": "prometheus",
+      "health": "up",
+      "error": ""
+    }
+  ],
+  "metrics": {
+    "https": [
+      {
+        "labels": {
+          "__name__": "probe_success",
+          "instance": "studentencloud-https",
+          "job": "blackbox-https"
+        },
+        "value": "1"
+      }
+    ],
+    "database": [
+      {
+        "labels": {
+          "__name__": "mysql_up",
+          "instance": "nc-db",
+          "job": "mysqld"
+        },
+        "value": "1"
+      }
+    ],
+    "certificate_expiry": [
+      {
+        "labels": {
+          "__name__": "probe_ssl_earliest_cert_expiry",
+          "instance": "studentencloud-https",
+          "job": "blackbox-https"
+        },
+        "value": "1824900712"
+      }
+    ],
+    "data_mount": [
+      {
+        "labels": {
+          "__name__": "node_filesystem_size_bytes",
+          "device": "/dev/sdb1",
+          "fstype": "ext4",
+          "instance": "studentencloud-vm",
+          "job": "node",
+          "mountpoint": "/srv/nextcloud-data"
+        },
+        "value": "210239463424"
+      }
+    ],
+    "containers": [
+      {
+        "labels": {
+          "__name__": "studentcloud_container_healthy",
+          "container": "authentik-postgresql-1",
+          "instance": "studentencloud-vm",
+          "job": "node"
+        },
+        "value": "1"
+      },
+      {
+        "labels": {
+          "__name__": "studentcloud_container_healthy",
+          "container": "authentik-redis-1",
+          "instance": "studentencloud-vm",
+          "job": "node"
+        },
+        "value": "1"
+      },
+      {
+        "labels": {
+          "__name__": "studentcloud_container_healthy",
+          "container": "authentik-server-1",
+          "instance": "studentencloud-vm",
+          "job": "node"
+        },
+        "value": "1"
+      },
+      {
+        "labels": {
+          "__name__": "studentcloud_container_healthy",
+          "container": "authentik-worker-1",
+          "instance": "studentencloud-vm",
+          "job": "node"
+        },
+        "value": "1"
+      },
+      {
+        "labels": {
+          "__name__": "studentcloud_container_healthy",
+          "container": "nc-app",
+          "instance": "studentencloud-vm",
+          "job": "node"
+        },
+        "value": "1"
+      },
+      {
+        "labels": {
+          "__name__": "studentcloud_container_healthy",
+          "container": "nc-clamav",
+          "instance": "studentencloud-vm",
+          "job": "node"
+        },
+        "value": "1"
+      },
+      {
+        "labels": {
+          "__name__": "studentcloud_container_healthy",
+          "container": "nc-cron",
+          "instance": "studentencloud-vm",
+          "job": "node"
+        },
+        "value": "1"
+      },
+      {
+        "labels": {
+          "__name__": "studentcloud_container_healthy",
+          "container": "nc-db",
+          "instance": "studentencloud-vm",
+          "job": "node"
+        },
+        "value": "1"
+      },
+      {
+        "labels": {
+          "__name__": "studentcloud_container_healthy",
+          "container": "nc-redis",
+          "instance": "studentencloud-vm",
+          "job": "node"
+        },
+        "value": "1"
+      }
+    ],
+    "recent_errors": [
+      {
+        "labels": {
+          "__name__": "studentcloud_nextcloud_recent_errors",
+          "instance": "studentencloud-vm",
+          "job": "node"
+        },
+        "value": "0"
+      }
+    ],
+    "log_readable": [
+      {
+        "labels": {
+          "__name__": "studentcloud_nextcloud_log_readable",
+          "instance": "studentencloud-vm",
+          "job": "node"
+        },
+        "value": "1"
+      }
+    ],
+    "collector_timestamp": [
+      {
+        "labels": {
+          "__name__": "studentcloud_collector_timestamp_seconds",
+          "instance": "studentencloud-vm",
+          "job": "node"
+        },
+        "value": "1794576001"
+      }
+    ],
+    "backup_timestamp": [
+      {
+        "labels": {
+          "__name__": "backup_last_success_timestamp_seconds",
+          "instance": "studentencloud-vm",
+          "job": "node"
+        },
+        "value": "0"
+      }
+    ],
+    "backup_collector_timestamp": [
+      {
+        "labels": {
+          "__name__": "backup_check_timestamp_seconds",
+          "instance": "studentencloud-vm",
+          "job": "node"
+        },
+        "value": "1794576001"
+      }
+    ]
+  },
+  "host_port_bindings": {
+    "mon-node-exporter": {},
+    "mon-blackbox": {},
+    "mon-mysqld-exporter": {},
+    "mon-prometheus": {
+      "9090/tcp": [
+        {
+          "HostIp": "127.0.0.1",
+          "HostPort": "9090"
+        }
+      ]
+    }
+  },
+  "alerts": [
+    {
+      "name": "BackupTeOud",
+      "state": "pending"
+    }
+  ],
+  "limitations": [
+    "Checks this VM locally; does not prove access from a student network.",
+    "A backup timestamp of zero means no successful backup marker exists.",
+    "Alerts are visible in Prometheus; external notifications are not configured."
+  ]
+}

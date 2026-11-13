@@ -1,0 +1,1698 @@
+{
+  "rule_files": [
+    "alert-rules.yml"
+  ],
+  "evaluation_interval": "30s",
+  "tests": [
+    {
+      "name": "HTTPS outage",
+      "interval": "30s",
+      "input_series": [
+        {
+          "series": "up{job=\"prometheus\",instance=\"localhost:9090\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"node\",instance=\"studentencloud-vm\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox\",instance=\"mon-blackbox:9115\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "probe_success{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "mysql_up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "studentcloud_container_healthy{container=\"nc-app\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_collector_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_readable",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_recent_errors",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "probe_ssl_earliest_cert_expiry{job=\"blackbox-https\"}",
+          "values": "5184000+0x4000"
+        },
+        {
+          "series": "backup_last_success_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "backup_check_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_invalid_lines",
+          "values": "0+0x4000"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "count(ALERTS{alertname=\"NextcloudOnbereikbaar\",alertstate=\"firing\"}) or vector(0)",
+          "eval_time": "7m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "container stopped",
+      "interval": "30s",
+      "input_series": [
+        {
+          "series": "up{job=\"prometheus\",instance=\"localhost:9090\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"node\",instance=\"studentencloud-vm\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox\",instance=\"mon-blackbox:9115\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "probe_success{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "mysql_up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "studentcloud_container_healthy{container=\"nc-app\"}",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "studentcloud_collector_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_readable",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_recent_errors",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "probe_ssl_earliest_cert_expiry{job=\"blackbox-https\"}",
+          "values": "5184000+0x4000"
+        },
+        {
+          "series": "backup_last_success_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "backup_check_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_invalid_lines",
+          "values": "0+0x4000"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "count(ALERTS{alertname=\"ContainerNietGezond\",alertstate=\"firing\"}) or vector(0)",
+          "eval_time": "5m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "system disk full",
+      "interval": "30s",
+      "input_series": [
+        {
+          "series": "up{job=\"prometheus\",instance=\"localhost:9090\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"node\",instance=\"studentencloud-vm\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox\",instance=\"mon-blackbox:9115\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "probe_success{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "mysql_up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "100+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "studentcloud_container_healthy{container=\"nc-app\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_collector_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_readable",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_recent_errors",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "probe_ssl_earliest_cert_expiry{job=\"blackbox-https\"}",
+          "values": "5184000+0x4000"
+        },
+        {
+          "series": "backup_last_success_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "backup_check_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_invalid_lines",
+          "values": "0+0x4000"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "count(ALERTS{alertname=\"SysteemdiskBijnaVol\",alertstate=\"firing\"}) or vector(0)",
+          "eval_time": "7m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "data disk full",
+      "interval": "30s",
+      "input_series": [
+        {
+          "series": "up{job=\"prometheus\",instance=\"localhost:9090\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"node\",instance=\"studentencloud-vm\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox\",instance=\"mon-blackbox:9115\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "probe_success{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "mysql_up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "100+0x4000"
+        },
+        {
+          "series": "studentcloud_container_healthy{container=\"nc-app\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_collector_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_readable",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_recent_errors",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "probe_ssl_earliest_cert_expiry{job=\"blackbox-https\"}",
+          "values": "5184000+0x4000"
+        },
+        {
+          "series": "backup_last_success_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "backup_check_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_invalid_lines",
+          "values": "0+0x4000"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "count(ALERTS{alertname=\"DataDiskBijnaVol\",alertstate=\"firing\"}) or vector(0)",
+          "eval_time": "12m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "missing data mount",
+      "interval": "30s",
+      "input_series": [
+        {
+          "series": "up{job=\"prometheus\",instance=\"localhost:9090\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"node\",instance=\"studentencloud-vm\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox\",instance=\"mon-blackbox:9115\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "probe_success{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "mysql_up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "studentcloud_container_healthy{container=\"nc-app\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_collector_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_readable",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_recent_errors",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "probe_ssl_earliest_cert_expiry{job=\"blackbox-https\"}",
+          "values": "5184000+0x4000"
+        },
+        {
+          "series": "backup_last_success_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "backup_check_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_invalid_lines",
+          "values": "0+0x4000"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "count(ALERTS{alertname=\"DataMountOntbreekt\",alertstate=\"firing\"}) or vector(0)",
+          "eval_time": "7m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "exporter down",
+      "interval": "30s",
+      "input_series": [
+        {
+          "series": "up{job=\"prometheus\",instance=\"localhost:9090\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"node\",instance=\"studentencloud-vm\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox\",instance=\"mon-blackbox:9115\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "probe_success{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "mysql_up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "studentcloud_container_healthy{container=\"nc-app\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_collector_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_readable",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_recent_errors",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "probe_ssl_earliest_cert_expiry{job=\"blackbox-https\"}",
+          "values": "5184000+0x4000"
+        },
+        {
+          "series": "backup_last_success_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "backup_check_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_invalid_lines",
+          "values": "0+0x4000"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "count(ALERTS{alertname=\"MonitoringTargetDown\",alertstate=\"firing\"}) or vector(0)",
+          "eval_time": "5m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "missing job",
+      "interval": "30s",
+      "input_series": [
+        {
+          "series": "up{job=\"prometheus\",instance=\"localhost:9090\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"node\",instance=\"studentencloud-vm\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox\",instance=\"mon-blackbox:9115\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "probe_success{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "mysql_up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "studentcloud_container_healthy{container=\"nc-app\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_collector_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_readable",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_recent_errors",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "probe_ssl_earliest_cert_expiry{job=\"blackbox-https\"}",
+          "values": "5184000+0x4000"
+        },
+        {
+          "series": "backup_last_success_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "backup_check_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_invalid_lines",
+          "values": "0+0x4000"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "count(ALERTS{alertname=\"MonitoringJobOntbreekt\",alertstate=\"firing\"}) or vector(0)",
+          "eval_time": "5m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "collector cron stopped",
+      "interval": "30s",
+      "input_series": [
+        {
+          "series": "up{job=\"prometheus\",instance=\"localhost:9090\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"node\",instance=\"studentencloud-vm\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox\",instance=\"mon-blackbox:9115\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "probe_success{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "mysql_up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "studentcloud_container_healthy{container=\"nc-app\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_collector_timestamp_seconds",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_readable",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_recent_errors",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "probe_ssl_earliest_cert_expiry{job=\"blackbox-https\"}",
+          "values": "5184000+0x4000"
+        },
+        {
+          "series": "backup_last_success_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "backup_check_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_invalid_lines",
+          "values": "0+0x4000"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "count(ALERTS{alertname=\"HostCollectorVerouderd\",alertstate=\"firing\"}) or vector(0)",
+          "eval_time": "17m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "unreadable log",
+      "interval": "30s",
+      "input_series": [
+        {
+          "series": "up{job=\"prometheus\",instance=\"localhost:9090\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"node\",instance=\"studentencloud-vm\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox\",instance=\"mon-blackbox:9115\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "probe_success{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "mysql_up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "studentcloud_container_healthy{container=\"nc-app\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_collector_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_readable",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_recent_errors",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "probe_ssl_earliest_cert_expiry{job=\"blackbox-https\"}",
+          "values": "5184000+0x4000"
+        },
+        {
+          "series": "backup_last_success_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "backup_check_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_invalid_lines",
+          "values": "0+0x4000"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "count(ALERTS{alertname=\"NextcloudLogNietLeesbaar\",alertstate=\"firing\"}) or vector(0)",
+          "eval_time": "7m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "application error",
+      "interval": "30s",
+      "input_series": [
+        {
+          "series": "up{job=\"prometheus\",instance=\"localhost:9090\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"node\",instance=\"studentencloud-vm\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox\",instance=\"mon-blackbox:9115\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "probe_success{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "mysql_up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "studentcloud_container_healthy{container=\"nc-app\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_collector_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_readable",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_recent_errors",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "probe_ssl_earliest_cert_expiry{job=\"blackbox-https\"}",
+          "values": "5184000+0x4000"
+        },
+        {
+          "series": "backup_last_success_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "backup_check_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_invalid_lines",
+          "values": "0+0x4000"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "count(ALERTS{alertname=\"NextcloudFouten\",alertstate=\"firing\"}) or vector(0)",
+          "eval_time": "4m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "database auth or availability fails",
+      "interval": "30s",
+      "input_series": [
+        {
+          "series": "up{job=\"prometheus\",instance=\"localhost:9090\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"node\",instance=\"studentencloud-vm\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox\",instance=\"mon-blackbox:9115\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "probe_success{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "mysql_up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "studentcloud_container_healthy{container=\"nc-app\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_collector_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_readable",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_recent_errors",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "probe_ssl_earliest_cert_expiry{job=\"blackbox-https\"}",
+          "values": "5184000+0x4000"
+        },
+        {
+          "series": "backup_last_success_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "backup_check_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_invalid_lines",
+          "values": "0+0x4000"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "count(ALERTS{alertname=\"MariaDBDown\",alertstate=\"firing\"}) or vector(0)",
+          "eval_time": "5m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "certificate nearing expiry",
+      "interval": "30s",
+      "input_series": [
+        {
+          "series": "up{job=\"prometheus\",instance=\"localhost:9090\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"node\",instance=\"studentencloud-vm\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox\",instance=\"mon-blackbox:9115\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "probe_success{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "mysql_up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "studentcloud_container_healthy{container=\"nc-app\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_collector_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_readable",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_recent_errors",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "probe_ssl_earliest_cert_expiry{job=\"blackbox-https\"}",
+          "values": "1728000+0x4000"
+        },
+        {
+          "series": "backup_last_success_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "backup_check_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_invalid_lines",
+          "values": "0+0x4000"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "count(ALERTS{alertname=\"CertBijnaVerlopen\",alertstate=\"firing\"}) or vector(0)",
+          "eval_time": "65m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "backup too old",
+      "interval": "30s",
+      "input_series": [
+        {
+          "series": "up{job=\"prometheus\",instance=\"localhost:9090\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"node\",instance=\"studentencloud-vm\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox\",instance=\"mon-blackbox:9115\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "probe_success{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "mysql_up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "studentcloud_container_healthy{container=\"nc-app\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_collector_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_readable",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_recent_errors",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "probe_ssl_earliest_cert_expiry{job=\"blackbox-https\"}",
+          "values": "5184000+0x4000"
+        },
+        {
+          "series": "backup_last_success_timestamp_seconds",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "backup_check_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_invalid_lines",
+          "values": "0+0x4000"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "count(ALERTS{alertname=\"BackupTeOud\",alertstate=\"firing\"}) or vector(0)",
+          "eval_time": "26h",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "backup metric missing",
+      "interval": "30s",
+      "input_series": [
+        {
+          "series": "up{job=\"prometheus\",instance=\"localhost:9090\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"node\",instance=\"studentencloud-vm\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox\",instance=\"mon-blackbox:9115\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "probe_success{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "mysql_up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "studentcloud_container_healthy{container=\"nc-app\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_collector_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_readable",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_recent_errors",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "probe_ssl_earliest_cert_expiry{job=\"blackbox-https\"}",
+          "values": "5184000+0x4000"
+        },
+        {
+          "series": "backup_check_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_invalid_lines",
+          "values": "0+0x4000"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "count(ALERTS{alertname=\"BackupMetricOntbreekt\",alertstate=\"firing\"}) or vector(0)",
+          "eval_time": "7m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "backup cron stopped",
+      "interval": "30s",
+      "input_series": [
+        {
+          "series": "up{job=\"prometheus\",instance=\"localhost:9090\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"node\",instance=\"studentencloud-vm\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox\",instance=\"mon-blackbox:9115\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "probe_success{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "mysql_up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "studentcloud_container_healthy{container=\"nc-app\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_collector_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_readable",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_recent_errors",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "probe_ssl_earliest_cert_expiry{job=\"blackbox-https\"}",
+          "values": "5184000+0x4000"
+        },
+        {
+          "series": "backup_last_success_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "backup_check_timestamp_seconds",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_invalid_lines",
+          "values": "0+0x4000"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "count(ALERTS{alertname=\"BackupMetricOntbreekt\",alertstate=\"firing\"}) or vector(0)",
+          "eval_time": "22m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "healthy system has no alerts",
+      "interval": "30s",
+      "input_series": [
+        {
+          "series": "up{job=\"prometheus\",instance=\"localhost:9090\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"node\",instance=\"studentencloud-vm\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox\",instance=\"mon-blackbox:9115\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "probe_success{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "mysql_up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "studentcloud_container_healthy{container=\"nc-app\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_collector_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_readable",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_recent_errors",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "probe_ssl_earliest_cert_expiry{job=\"blackbox-https\"}",
+          "values": "5184000+0x4000"
+        },
+        {
+          "series": "backup_last_success_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "backup_check_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_invalid_lines",
+          "values": "0+0x4000"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "count(ALERTS{alertstate=\"firing\"}) or vector(0)",
+          "eval_time": "65m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "outage recovers",
+      "interval": "30s",
+      "input_series": [
+        {
+          "series": "up{job=\"prometheus\",instance=\"localhost:9090\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"node\",instance=\"studentencloud-vm\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox\",instance=\"mon-blackbox:9115\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "probe_success{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "0+0x12 1+0x30"
+        },
+        {
+          "series": "mysql_up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "studentcloud_container_healthy{container=\"nc-app\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_collector_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_readable",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_recent_errors",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "probe_ssl_earliest_cert_expiry{job=\"blackbox-https\"}",
+          "values": "5184000+0x4000"
+        },
+        {
+          "series": "backup_last_success_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "backup_check_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_invalid_lines",
+          "values": "0+0x4000"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "count(ALERTS{alertname=\"NextcloudOnbereikbaar\",alertstate=\"firing\"}) or vector(0)",
+          "eval_time": "6m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "expr": "count(ALERTS{alertname=\"NextcloudOnbereikbaar\",alertstate=\"firing\"}) or vector(0)",
+          "eval_time": "8m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "malformed application log",
+      "interval": "30s",
+      "input_series": [
+        {
+          "series": "up{job=\"prometheus\",instance=\"localhost:9090\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"node\",instance=\"studentencloud-vm\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox\",instance=\"mon-blackbox:9115\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "up{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "probe_success{job=\"blackbox-https\",instance=\"studentencloud-https\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "mysql_up{job=\"mysqld\",instance=\"nc-db\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "node_filesystem_size_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "1000+0x4000"
+        },
+        {
+          "series": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/srv/nextcloud-data\"}",
+          "values": "500+0x4000"
+        },
+        {
+          "series": "studentcloud_container_healthy{container=\"nc-app\"}",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_collector_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_readable",
+          "values": "1+0x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_recent_errors",
+          "values": "0+0x4000"
+        },
+        {
+          "series": "probe_ssl_earliest_cert_expiry{job=\"blackbox-https\"}",
+          "values": "5184000+0x4000"
+        },
+        {
+          "series": "backup_last_success_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "backup_check_timestamp_seconds",
+          "values": "0+30x4000"
+        },
+        {
+          "series": "studentcloud_nextcloud_log_invalid_lines",
+          "values": "1+0x4000"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "count(ALERTS{alertname=\"NextcloudLogFormaat\",alertstate=\"firing\"}) or vector(0)",
+          "eval_time": "7m",
+          "exp_samples": [
+            {
+              "labels": "{}",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
