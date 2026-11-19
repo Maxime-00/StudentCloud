@@ -36,7 +36,7 @@ De officiële M11 vraagt monitoring van zes domeinen. E-mail/webhooks, een onafh
 | M15 | Publieke links standaard uit of strikt begrensd | Maxime + Thorben | 🟨 Bezig | core `shareapi_enforce_links_password` en `shareapi_enforce_expire_date` | Verplichte wachtwoorden/verval staan aan; publieke links zijn niet aantoonbaar standaard uit. Nog nodig: concrete standaard-/maximale termijn en scope vastleggen, en aantonen dat een gebruiker de grenzen niet kan omzeilen. |
 | M16 | Versie-/prullenbakbeleid met duidelijke retentie | Maxime + Thorben | 🟨 Bezig | [retentiebeleid](docs/policies.md); VM-audit | Versies en prullenbakapps actief. Expliciete trashbin-/versions-retentie en versielimiet zijn niet ingesteld in de gecontroleerde systeemconfiguratie; dat bewijst niet dat er geen standaardretentie is. Beleid noemt 30 dagen en 10 versies. Nog nodig: beleid en effectieve werking op elkaar afstemmen en herstel/verwijdergedrag testen. |
 | M17 | Veilige uploadlimieten | Thorben + Maxime | 🟨 Bezig | Compose/Nginx; effectieve PHP-limieten | PHP upload_max_filesize en post_max_size staan op 2G; Apache-omgeving vermeldt 2147483648 en repository-Nginx 2G. Nog nodig: effectieve proxy/servergrens en antivirusstreamlimiet afstemmen, oversized upload afwijzen en afwezigheid van gedeeltelijke data aantonen. |
-| M18 | Gebruikersgids | Thorben + Michiel | ⬜ Todo | Geen specifieke gids aangetroffen | Installatie-/beheerdocumentatie vervangt geen eindgebruikersgids. Gids voor aanmelden/MFA, synchronisatie, delen, quota en herstel maken en met een representatieve gebruiker doorlopen. |
+| M18 | Gebruikersgids | Thorben + Michiel | 🟨 Bezig | [gebruikersgids](docs/gebruikersgids.md) (19-11-2026) | Eerste versie van de gids is geschreven: aanmelden/certificaat/MFA, opslag, groepsrechten, interne en externe delen (wachtwoord/verval), quota, prullenbak/versies, desktop-/mobiel-sync met conflicten, offboarding en probleemoplossing. Nog nodig: doorlopen met een representatieve gebruiker en eventuele wijzigingen verwerken; de doorloop is geen implementatiebewijs op zich. |
 
 ## Should
 
@@ -62,7 +62,7 @@ De officiële M11 vraagt monitoring van zes domeinen. E-mail/webhooks, een onafh
 | Opleverstuk | Actuele beoordeling / volgende stap |
 |---|---|
 | [Toolvergelijking](docs/tool-comparison.md) | Nextcloud, Seafile en ownCloud vergeleken; keuze gemotiveerd. Release-/patchonderhoud opvolgen. |
-| [Dataflow- en storagediagram](docs/architecture.md) | Diagrammen bestaan maar tekst loopt achter: ClamAV, Authentik, monitoring en huidige back-uplocatie ontbreken deels; bijwerken op de vastgestelde architectuur. |
+| [Dataflow- en storagediagram](docs/architecture.md) | Bijgewerkt op 19-11-2026: dataflow- en storagediagram tonen nu Nginx/TLS, ClamAV, Authentik, de monitoring-stack, de back-uplocatie met marker en de opslagstructuur; de sectie "Wat is er en wat staat er nog open?" onderscheidt bestaande van openstaande onderdelen (off-VM-back-up, off-VM-waarnemer, volledige applicatierestore, afgeronde SSO-flow). |
 | [Installatie en beheer](infrastructure/install-notes.md) | Uitgebreide instructies plus werkende VM aangetoond. VM-checkout staat nog op dcc699b, achter de gepushte main; monitoring is apart gedeployd. Lokale infra-hardening.patch behouden bij toekomstige synchronisatie. |
 | [Rollenmatrix](docs/roles-security.md) | Vier rollen en historisch rapport aanwezig; actuele delegatie/MFA en echte toegangsproeven ontbreken. |
 | [Privacy- en retentieanalyse](docs/policies.md) | Deels placeholder/concept. Dataclassificatie, risicoanalyse, effectieve retentie en consistente lifecycle afwerken. |
@@ -75,7 +75,7 @@ De officiële M11 vraagt monitoring van zes domeinen. E-mail/webhooks, een onafh
 | Onboarding/offboardingrunbooks | Concepten aanwezig; volledige runbooks, accountreview en uitgevoerde AT07 ontbreken. |
 | [Acceptatietestplan](docs/acceptance-tests.md) | Plan aanwezig. AT-Q1 heeft deelresultaten; hoofdscenario's hebben geen volledig gecontroleerde acceptatie. |
 | [Testresultaten](evidence/test-results/) en [screenshots](evidence/screenshots/) | M07-, M10-, M11-, rollen-, quota- en auditbestanden aanwezig. De oude claim Alleen .gitkeep is onjuist; screenshotdirectory bevat nu ook twee EICAR-screenshots uit aedebd0. |
-| Interviews, scope, pilot en gebruikersgids | Projectplan en interviewvragen aanwezig; geen afgeronde interviews, pilotverslag of gids aangetroffen. |
+| Interviews, scope, pilot en gebruikersgids | Projectplan en interviewvragen aanwezig. De [gebruikersgids](docs/gebruikersgids.md) staat sinds 19-11-2026; afgeronde interviews en het pilotverslag ontbreken nog, net als de doorloop van de gids met een representatieve gebruiker. |
 
 ## Branches en actuele bron
 
@@ -91,7 +91,7 @@ De officiële M11 vraagt monitoring van zes domeinen. E-mail/webhooks, een onafh
 2. AT01-AT05 uitvoeren: opslagisolatie, groepsrechten, quota-/waarschuwingen, links en antivirus/uploadlimieten.
 3. Met Maxime volledige geïsoleerde restore, back-upplanning en off-VM-bescherming afronden.
 4. Lifecycle/retentie afstemmen en AT07 uitvoeren; syncconflict AT06 vastleggen.
-5. Diagrammen, interviews/pilot, gebruikersgids en capaciteitsadvies afwerken.
+5. Interviews/pilot, capaciteitsadvies en de gebruikersgids-doorloop met een representatieve gebruiker afwerken (diagrammen zijn op 19-11-2026 bijgewerkt; de gids staat er sinds die datum).
 6. Externe signalering/off-VM-monitoring toevoegen als het team die uitbreiding wil; de beperking van lokale monitoring blijft zichtbaar in de overdracht.
 
-**Telling (27 eisen): 4 Klaar, 16 Bezig, 7 Todo, 0 Geblokkeerd.** Klaar: M01, M07, M09 en M11. Must: 4 Klaar, 13 Bezig, 1 Todo. Should: 2 Bezig, 3 Todo. Could: 1 Bezig, 3 Todo.
+**Telling (27 eisen): 4 Klaar, 17 Bezig, 6 Todo, 0 Geblokkeerd.** Klaar: M01, M07, M09 en M11. Must: 4 Klaar, 14 Bezig, 0 Todo. Should: 2 Bezig, 3 Todo. Could: 1 Bezig, 3 Todo. (19-11-2026: M18 na publicatie van de gebruikersgids van Todo naar Bezig; architecturendiagrams bijgewerkt.)

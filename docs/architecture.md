@@ -5,46 +5,64 @@ verplichte dataflowdiagram en storagediagram.
 
 ## Is dit werkelijk de huidige situatie?
 
-Gedeeltelijk. De Docker-configuratie in de repository bevat werkelijk vier
-containers: Nextcloud, MariaDB, Redis en cron. Daarin staat ook dat alleen
-Nextcloud poort 8080 publiceert en dat gebruikersbestanden naar
-`/srv/nextcloud-data/data` worden geschreven.
+Ja, voor de onderdelen die hier zijn getekend. De VM `studentencloud`
+(`10.20.254.141`, Ubuntu Server 24.04, 200 GB-dataschijf) draait:
 
-De installatiedocumentatie vermeldt VM `studentencloud`, IP-adres
-`10.20.254.141`, Ubuntu Server 24.04 en een dataschijf van 200 GB. In de
-repository staat nog geen uitvoer van `docker compose ps`, `findmnt` of een
-testresultaat waarmee dit onafhankelijk is bewezen. Deze gegevens moeten dus op
-de VM worden gecontroleerd.
+- de Nextcloud-stack (`nc-app`, `nc-db`, `nc-redis`, `nc-cron` en
+  `nc-clamav`) via `infrastructure/docker/docker-compose.yml`;
+- Nginx als reverse proxy met TLS (self-signed certificaat, M07); HTTP (80)
+  redirecteert alles naar HTTPS (443);
+- Authentik (server, worker, PostgreSQL en een OIDC-demo-client) via
+  `infrastructure/authentik/docker-compose.yml`, op het afgezonderde
+  netwerk `ch9-authentik-identity`;
+- de monitoring-stack (node-exporter, blackbox-exporter, mysqld-exporter en
+  Prometheus, lokaal op `127.0.0.1:9090`) via
+  `infrastructure/docker/monitoring/compose.yml`;
+- back-ups van database, configuratie en bestanden op de VM-dataschijf, met
+  een back-upmarker die door de monitoring wordt opgevolgd.
 
-De Nginx reverse proxy (HTTP) en ClamAV staan op de VM. TLS (self-signed
-certificaat) wordt in deze branch aangesloten (M07). Monitoring en back-up
-staan nog in de planning en zijn daarom niet als werkende onderdelen in de
-diagrammen getekend.
+In de audit van 13-11-2026 zijn deze onderdelen levend gecontroleerd; zie
+`evidence/test-results/` voor het bewijs.
 
 ## De onderdelen in gewone taal
 
 | Onderdeel | Eenvoudige uitleg |
 |---|---|
+| Nginx | Eindigt TLS (HTTPS) op poort 443 en doorgeeft naar Nextcloud; HTTP (80) redirecteert naar HTTPS. |
 | Nextcloud | De website waar gebruikers inloggen en bestanden beheren. |
 | MariaDB | Bewaart accounts, instellingen, rechten en informatie over bestanden. |
 | Redis | Helpt Nextcloud sneller en voorkomt dat twee processen tegelijk hetzelfde bestand aanpassen. |
 | Cron | Voert automatisch periodieke Nextcloud-taken uit. |
+| ClamAV | Detectie van malware in bestanden die worden geüpload (files_antivirus). |
+| Authentik | Identiteitsdienst (OIDC/SSO) met eigen PostgreSQL; afgezonderd van de Nextcloud-stack. |
+| Monitoring (Prometheus) | Meet bereikbaarheid, opslag, database, certificaat, back-up en fouten; alleen lokaal op 9090 bereikbaar. |
 | 200 GB-dataschijf | Bewaart de inhoud van gebruikers- en groepsbestanden. |
 | `nc-html` | Bewaart de Nextcloud-installatie en configuratie. |
 | `db-data` | Bewaart de MariaDB-database. |
 
 ## Dataflowdiagram
 
-Dit diagram toont wat er gebeurt wanneer een gebruiker een bestand uploadt.
+Dit diagram toont wat er gebeurt wanneer een gebruiker een bestand uploadt,
+inclusief identiteit (Authentik), malwarecontrole (ClamAV) en monitoring.
 
 ```mermaid
 flowchart LR
     User[Gebruiker] -->|HTTPS 443 self-signed cert| Nginx[Nginx reverse proxy]
-    Nginx -->|HTTP 127.0.0.1:8080| Nextcloud[Nextcloud]
-    Nextcloud -->|bestand opslaan| Files[200 GB-dataschijf]
-    Nextcloud -->|account, rechten en metadata| Database[MariaDB]
-    Nextcloud -->|cache en file locking| Redis[Redis]
-    Cron[Cron] -->|periodieke taken| Nextcloud
+    Nginx -->|HTTP 127.0.0.1:8080| Nextcloud[Nextcloud nc-app]
+    Nextcloud -->|bestand opslaan| Files[200 GB-dataschijf<br/>/srv/nextcloud-data/data]
+    Nextcloud -->|account, rechten en metadata| Database[MariaDB nc-db]
+    Nextcloud -->|cache en file locking| Redis[Redis nc-redis]
+    Cron[Cron nc-cron<br/>periodieke taken] -->|scan en taken| Nextcloud
+    Nextcloud -->|scan op malware| ClamAV[ClamAV nc-clamav]
+    User -.->|SSO OIDC, na S05| Authentik[Authentik<br/>server + worker + PostgreSQL]
+
+    subgraph Monitoring[Monitoring, lokaal op 127.0.0.1:9090]
+        Prometheus[Prometheus] -->|scrapes| NEx[node-exporter]
+        Prometheus -->|scrapes| BBox[blackbox-exporter]
+        Prometheus -->|scrapes| MyEx[mysqld-exporter]
+        Prometheus -->|scrapes| BackupMarker[back-upmarker<br/>.last-backup-marker]
+    end
+    BBox -.->|TLS-check| Nginx
 ```
 
 In stappen:
@@ -55,6 +73,12 @@ In stappen:
 3. De inhoud van een upload gaat naar de 200 GB-dataschijf.
 4. MariaDB bewaart wie de eigenaar is en waar het bestand bij hoort.
 5. Redis ondersteunt cache en vergrendeling; cron voert achtergrondtaken uit.
+6. Bij upload scant `files_antivirus` het bestand met ClamAV; malware wordt
+   geweigerd (HTTP 415) en het tijdelijke uploadbestand verwijderd.
+7. SSO via Authentik loopt over een apart netwerk en raakt de
+   Nextcloud-containers niet (operationeel werk, zie S05).
+8. Prometheus scrapes de exporters, voert HTTPS-bereikbaarheidscontroles uit en
+   volgt de back-upmarker; het draait alleen op loopback (M11).
 
 ## Storagediagram
 
@@ -63,11 +87,16 @@ flowchart TB
     VM[VM studentencloud]
     VM --> Html[nc-html<br/>Nextcloud en configuratie]
     VM --> DB[db-data<br/>database en metadata]
-    VM --> Disk[200 GB-dataschijf<br/>gebruikersbestanden]
+    VM --> Disk[200 GB-dataschijf<br/>/srv/nextcloud-data]
 
-    Disk --> Personal[Persoonlijke bestanden]
-    Disk --> Groups[Groepsbestanden]
-    Disk --> Versions[Versies en prullenbak]
+    Disk --> Data[data/<br/>gebruikersbestanden]
+    Data --> Personal[Persoonlijke bestanden]
+    Data --> Groups[Groepsbestanden<br/>groupfolders]
+    Data --> Versions[Versies en prullenbak]
+
+    VM --> Backup[Back-up op VM-dataschijf<br/>db-dump + config + data<br/>+ back-upmarker]
+    VM --> NCert[SSL-certs<br/>/etc/nginx/ssl]
+    AVM[Authentik VM-netwerk<br/>ch9-authentik-identity] --> ADB[PostgreSQL-data<br/>Authentik-accounts]
 ```
 
 De persoonlijke quota van 2 GB en groepsquota van 5 GB zijn logische limieten
@@ -75,17 +104,26 @@ in Nextcloud. Het zijn geen aparte schijfpartities. Alle bestanden staan samen
 op de 200 GB-dataschijf, maar Nextcloud houdt per gebruiker en groep bij hoeveel
 ruimte gebruikt mag worden.
 
-## Wat komt er later nog bij?
+## Wat is er en wat staat er nog open?
 
-De reverse proxy (Nginx) en ClamAV draaien al op de VM; TLS (self-signed
-certificaat) wordt in deze branch aangesloten (M07). Voor de definitieve
-omgeving moeten nog worden toegevoegd en getest:
+Reeds aanwezig en getekend in de diagrams:
 
-- monitoring van bereikbaarheid, opslag, database, certificaat en back-up;
-- een afzonderlijk back-updoel voor bestanden, database en configuratie.
+- reverse proxy (Nginx) met TLS via self-signed certificaat (M07);
+- ClamAV voor malware-detectie (M09);
+- monitoring van bereikbaarheid, opslag, database, certificaat en back-up
+  (M11), alleen lokaal bereikbaar;
+- Authentik voor SSO op een eigen netwerk (S05, operationeel werk loopt nog);
+- back-ups van database, configuratie en bestanden met gemonitord
+  voltooiingsmarker (M10).
 
-Wanneer deze onderdelen echt zijn geïnstalleerd, moeten de diagrammen worden
-bijgewerkt.
+Nog open, niet als bestaand voorgesteld:
+
+- een **off-VM-beschermde, versleutelde back-uplocatie** (Restic/Borg) met
+  retentieplanning; de huidige back-up staat op dezelfde VM-schijf;
+- een off-VM-waarnemer of externe alert-ontvanger bij de monitoring;
+- een complete applicatierestore-test in isolatie (incl. metadata, rechten en
+  shares);
+- afgeronde SSO-flow (login, logout, MFA, blijvende rolkoppeling).
 
 ## Hoe controleer je of het diagram klopt?
 
