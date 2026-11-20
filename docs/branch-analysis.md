@@ -8,7 +8,7 @@ Alle beschikbare lokale en remote branches zijn na `git fetch origin --prune` op
 
 | Branch | Commit | Achter / voor origin/main | Bevinding |
 |---|---|---|---|
-| origin/main | `8633f93` | 0 / 0 | Nieuwe merge neemt de vier configuratiecommits over: toolvergelijking, Compose, installatieplan en account-/MFA-/quotatestplannen. |
+| origin/main | `8633f93` | 0 / 0 | Nieuwe merge neemt de vier configuratiecommits over: toolvergelijking, Compose, installatieplan en account-/quotatestplannen. |
 | origin/configuratie | `8b2c699` | 8 / 0 | Alle commits zijn al opgenomen in origin/main; eigen branch is nog niet bijgewerkt. |
 | origin/infra | `a685fba` | 3 / 3 | Nieuwe merge van de oudere main op `aafa28b`; infra behoudt de afwijkende stack en bevat meegecommitte conflictmarkeringen. |
 | origin/security | `aafa28b` | 5 / 0 | Geen nieuwe securitycommit; eerder werk is al opgenomen in main. |
@@ -18,7 +18,7 @@ Alle beschikbare lokale en remote branches zijn na `git fetch origin --prune` op
 
 ### Wijzigingen sinds de vorige controle
 
-- `8633f93` op origin/main voegt ten opzichte van de vorige main op `aafa28b` acht gewijzigde/toegevoegde bestanden toe: `docs/testing-auth-mfa.md`, `docs/testing-quotas-groupfolders.md`, `docs/tool-comparison.md`, `infrastructure/docker/.env.example`, `infrastructure/docker/.gitignore`, `infrastructure/docker/docker-compose.yml`, `infrastructure/install-notes.md` en `infrastructure/network-storage.md`.
+- `8633f93` op origin/main voegt ten opzichte van de vorige main op `aafa28b` acht gewijzigde/toegevoegde bestanden toe: `docs/testing-authentication.md`, `docs/testing-quotas-groupfolders.md`, `docs/tool-comparison.md`, `infrastructure/docker/.env.example`, `infrastructure/docker/.gitignore`, `infrastructure/docker/docker-compose.yml`, `infrastructure/install-notes.md` en `infrastructure/network-storage.md`.
 - `a685fba` op infra neemt de oudere security- en projectdocumentatie over uit main. Dit maakt de infra-stack nog niet gelijk aan de Compose op origin/main.
 - Een rechtstreekse `git grep` op alle remote branches vindt nog conflictmarkeringen in **origin/infra**: `README.md` (regel 56), `docs/tool-comparison.md` (regels 8, 26 en 52) en `infrastructure/network-storage.md` (regel 37). Deze markeringen staan daadwerkelijk in de commit en moeten worden afgewerkt vóór die documentatie wordt overgenomen.
 - Een verkennende `git merge-tree` voor origin/main en origin/infra toont bovendien conflicten in de toolvergelijking, opslagdocumentatie, `.env.example` en Compose. Er is bij deze controle geen branch samengevoegd.
@@ -27,7 +27,7 @@ Alle beschikbare lokale en remote branches zijn na `git fetch origin --prune` op
 
 De status blijft **15 Bezig, 12 Todo, 0 Klaar, 0 Geblokkeerd**. Bij M01–M06, M08, M12, M14 en M15 zijn de bronverwijzingen bijgewerkt omdat relevant configuratiewerk nu ook op origin/main staat. Het installatie- en capaciteitsbewijs is bijgewerkt met de nieuwe locaties en de infra-conflicten.
 
-Op origin/main, configuratie, infra en security staan onder `evidence/` alleen `.gitkeep`-bestanden. TLS, monitoring, gebruikersgids, Shoulds en Coulds hebben geen nieuw uitvoeringsbewijs. De bestaande aandachtspunten blijven gelden: twee verschillende Compose-opzetten, onduidelijke bijna-vol-waarschuwing, verschillende MFA-regels en de combinatie van deactivatie met read-only genadetijd.
+Op origin/main, configuratie, infra en security staan onder `evidence/` alleen `.gitkeep`-bestanden. TLS, monitoring, gebruikersgids, Shoulds en Coulds hebben geen nieuw uitvoeringsbewijs. De bestaande aandachtspunten blijven gelden: twee verschillende Compose-opzetten, onduidelijke bijna-vol-waarschuwing en de combinatie van deactivatie met read-only genadetijd.
 
 De volgende secties zijn historische analyses. Hun branchafstanden en uitspraken over samenvoegingen gelden alleen voor de beschreven eerdere momentopname.
 
@@ -41,7 +41,7 @@ Basis: `git fetch origin --prune`, alle lokale en remote branches, `origin/main`
 |---|---|---|---|
 | origin/main | 0 / 0 | `942f8e2`, `5f9aef7`, `aafa28b` (relevante security- en mergecommits) | Nextcloud-toolkeuze, conceptrollenmatrix, quota-/retentiebeleid, besmettingsbeleid en restoreplan op main. Geen uitgevoerde tests in `evidence/`. |
 | origin/security | 0 / 0 | Geen buiten origin/main | Is gelijk aan origin/main; securitydocumentatie is samengevoegd. |
-| origin/configuratie | 7 / 4 | `b7e5c7c`, `5aba00c`, `31a5f28`, `8b2c699` | Eigen toolvergelijking, Docker Compose en installatiehandleiding; testplannen voor accounts, MFA, quota en groepsmappen. Geen testresultaten. |
+| origin/configuratie | 7 / 4 | `b7e5c7c`, `5aba00c`, `31a5f28`, `8b2c699` | Eigen toolvergelijking, Docker Compose en installatiehandleiding; testplannen voor accounts, quota en groepsmappen. Geen testresultaten. |
 | origin/infra | 7 / 4 | `b7e5c7c`, `5aba00c`, `63f006a`, `b51bd2f` | Productiegerichtere Compose-variant met MariaDB, Redis, cron en vaste datamap; geen bewijs van VM-installatie, TLS of poortscan. |
 | lokale main | 0 / 1 | `de71073` | Officiële opdracht verwerkt in checklist, README, acceptatietestplan en projectplanning. Deze commit is nog niet naar origin/main gepusht. |
 
@@ -53,7 +53,6 @@ Basis: `git fetch origin --prune`, alle lokale en remote branches, `origin/main`
 - **M07 TLS** en **M11 monitoring** blijven Todo: de proxy/TLS en metingen staan alleen als afhankelijkheid of plan beschreven. De Docker-database heeft geen hostpoort, maar een externe scan voor M08 ontbreekt.
 - De configuratiebranch bindt de tijdelijke HTTP-poort als `${HTTP_PORT:-8080}:80` op de host; de infra-branch gebruikt eveneens `${HTTP_PORT:-8080}:80`. Dit is geen bewijs dat de app uitsluitend intern bereikbaar is. De uiteindelijke publicatieroute, firewall en proxy moeten nog worden gecontroleerd.
 - De Compose-varianten spreken elkaar tegen: configuratie gebruikt `nextcloud:latest`, `mariadb:11` en benoemde `nc-files`/`nc-config`-volumes zonder Redis/cron; infra gebruikt `nextcloud:35-apache`, `mariadb:11.8`, Redis/cron en `/srv/nextcloud-data/data`. Kies één reproduceerbare stack en pas installatie- en back-updocumentatie daarop aan.
-- Voor **M03/M13** vraagt de rollenmatrix MFA voor alle rollen, terwijl het configuratie-testplan MFA voor beheerders verplicht en andere accounts buiten die verplichting laat. Stem de beoogde regel af vóór implementatie.
 - Voor **M06** beschrijft het configuratie-testplan wel zichtbare opslagfeedback, maar zegt zelf dat automatische waarschuwing bij een instelbaar bijna-vol-percentage nog moet worden beslist. De Must-waarschuwing is dus niet aangetoond.
 - Voor **M12/M16** noemt het beleid onmiddellijke deactivatie gevolgd door 30 dagen read-only toegang. Bepaal hoe die read-only toegang werkt zonder het gedeactiveerde account te heractiveren.
 
@@ -84,7 +83,6 @@ Er zijn geen branches genaamd `application` of `architecture` aangetroffen. `ori
 |---|---|---|---|
 | M01 | Todo | - | Toolvergelijking en installatienotities bevatten alleen invulinstructies; geen platformkeuze of installatie. |
 | M02 | Todo | - | Geen accountconfiguratie of login-test. De conceptrollenmatrix bewijst geen persoonlijke accounts. |
-| M03 | Todo | - | MFA-reset wordt in de conceptmatrix genoemd, maar verplichte MFA voor beheerders is niet ingericht of getest. |
 | M04 | Todo | - | Geen persoonlijke opslag of isolatietest. |
 | M05 | Todo | - | Groepsmappen worden in het securityplan genoemd; geen configuratie of acceptatietest. |
 | M06 | Todo | - | Quota-limiet X is een open vraag in het securityplan; geen gekozen limiet of uploadtest. |

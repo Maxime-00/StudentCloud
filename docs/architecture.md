@@ -123,7 +123,7 @@ Nog open, niet als bestaand voorgesteld:
 - een off-VM-waarnemer of externe alert-ontvanger bij de monitoring;
 - een complete applicatierestore-test in isolatie (incl. metadata, rechten en
   shares);
-- afgeronde SSO-flow (login, logout, MFA, blijvende rolkoppeling).
+- afgeronde SSO-flow (login, logout, blijvende rolkoppeling).
 
 ## Hoe controleer je of het diagram klopt?
 

@@ -1,0 +1,215 @@
+﻿{
+    "checked_at_utc":  "2026-11-20T08:00:17.583237+00:00",
+    "system_settings":  {
+                            "trashbin_retention_obligation":  {
+                                                                  "exit":  1,
+                                                                  "value":  "",
+                                                                  "stderr":  ""
+                                                              },
+                            "versions_retention_obligation":  {
+                                                                  "exit":  1,
+                                                                  "value":  "",
+                                                                  "stderr":  ""
+                                                              },
+                            "overwrite.cli.url":  {
+                                                      "exit":  0,
+                                                      "value":  "http://localhost",
+                                                      "stderr":  ""
+                                                  },
+                            "twofactor_enforced":  {
+                                                       "exit":  1,
+                                                       "value":  "",
+                                                       "stderr":  ""
+                                                   },
+                            "default_phone_region":  {
+                                                         "exit":  1,
+                                                         "value":  "",
+                                                         "stderr":  ""
+                                                     }
+                        },
+    "app_settings":  {
+                         "shareapi_allow_links":  {
+                                                      "exit":  1,
+                                                      "value":  "",
+                                                      "stderr":  ""
+                                                  },
+                         "shareapi_enforce_links_password":  {
+                                                                 "exit":  0,
+                                                                 "value":  "1",
+                                                                 "stderr":  ""
+                                                             },
+                         "shareapi_default_expire_date":  {
+                                                              "exit":  0,
+                                                              "value":  "1",
+                                                              "stderr":  ""
+                                                          },
+                         "shareapi_expire_after_n_days":  {
+                                                              "exit":  1,
+                                                              "value":  "",
+                                                              "stderr":  ""
+                                                          },
+                         "shareapi_enforce_expire_date":  {
+                                                              "exit":  0,
+                                                              "value":  "1",
+                                                              "stderr":  ""
+                                                          }
+                     },
+    "antivirus_settings":  {
+                               "av_mode":  {
+                                               "exit":  0,
+                                               "value":  "daemon",
+                                               "stderr":  ""
+                                           },
+                               "av_host":  {
+                                               "exit":  0,
+                                               "value":  "clamav",
+                                               "stderr":  ""
+                                           },
+                               "av_port":  {
+                                               "exit":  0,
+                                               "value":  "3310",
+                                               "stderr":  ""
+                                           },
+                               "av_stream_max_length":  {
+                                                            "exit":  0,
+                                                            "value":  "26214400",
+                                                            "stderr":  ""
+                                                        },
+                               "av_max_file_size":  {
+                                                        "exit":  0,
+                                                        "value":  "-1",
+                                                        "stderr":  ""
+                                                    },
+                               "av_infected_action":  {
+                                                          "exit":  0,
+                                                          "value":  "only_log",
+                                                          "stderr":  ""
+                                                      }
+                           },
+    "selected_apps":  {
+                          "enabled":  {
+                                          "admin_audit":  "2.0.0-dev.0",
+                                          "files_antivirus":  "6.4.1",
+                                          "files_trashbin":  "2.0.0-dev.0",
+                                          "files_versions":  "2.0.0-dev.0",
+                                          "groupfolders":  "23.0.1",
+                                          "twofactor_backupcodes":  "2.0.0-dev.0",
+                                          "user_oidc":  "8.11.0"
+                                      },
+                          "disabled":  {
+                                           "twofactor_totp":  "17.1.0 (installed 17.1.0)"
+                                       }
+                      },
+    "admin_group":  {
+                        "exit":  0,
+                        "value":  "{\"groupID\":\"admin\",\"displayName\":\"admin\",\"backends\":[\"Database\"]}",
+                        "stderr":  ""
+                    },
+    "targets":  [
+                    {
+                        "job":  "blackbox",
+                        "health":  "up",
+                        "lastError":  ""
+                    },
+                    {
+                        "job":  "blackbox-https",
+                        "health":  "up",
+                        "lastError":  ""
+                    },
+                    {
+                        "job":  "mysqld",
+                        "health":  "up",
+                        "lastError":  ""
+                    },
+                    {
+                        "job":  "node",
+                        "health":  "up",
+                        "lastError":  ""
+                    },
+                    {
+                        "job":  "prometheus",
+                        "health":  "up",
+                        "lastError":  ""
+                    }
+                ],
+    "alerts":  [
+                   {
+                       "name":  "SysteemdiskBijnaVol",
+                       "state":  "firing",
+                       "activeAt":  "2026-11-18T13:39:40.286467559Z"
+                   },
+                   {
+                       "name":  "BackupTeOud",
+                       "state":  "firing",
+                       "activeAt":  "2026-11-14T13:48:05.15613502Z"
+                   }
+               ],
+    "metrics":  {
+                    "mysql_up":  [
+                                     {
+                                         "labels":  {
+                                                        "__name__":  "mysql_up",
+                                                        "instance":  "nc-db",
+                                                        "job":  "mysqld"
+                                                    },
+                                         "value":  "1"
+                                     }
+                                 ],
+                    "probe_success":  [
+                                          {
+                                              "labels":  {
+                                                             "__name__":  "probe_success",
+                                                             "instance":  "studentencloud-https",
+                                                             "job":  "blackbox-https"
+                                                         },
+                                              "value":  "1"
+                                          }
+                                      ],
+                    "backup_last_success_timestamp_seconds":  [
+                                                                  {
+                                                                      "labels":  {
+                                                                                     "__name__":  "backup_last_success_timestamp_seconds",
+                                                                                     "instance":  "studentencloud-vm",
+                                                                                     "job":  "node"
+                                                                                 },
+                                                                      "value":  "1794577661"
+                                                                  }
+                                                              ],
+                    "studentcloud_nextcloud_recent_errors":  [
+                                                                 {
+                                                                     "labels":  {
+                                                                                    "__name__":  "studentcloud_nextcloud_recent_errors",
+                                                                                    "instance":  "studentencloud-vm",
+                                                                                    "job":  "node"
+                                                                                },
+                                                                     "value":  "0"
+                                                                 }
+                                                             ]
+                },
+    "https":  {
+                  "status":  200,
+                  "certificate_validated":  true,
+                  "body":  {
+                               "installed":  true,
+                               "maintenance":  false,
+                               "needsDbUpgrade":  false,
+                               "version":  "35.0.1.1",
+                               "versionstring":  "35.0.1",
+                               "edition":  "",
+                               "productname":  "Nextcloud",
+                               "extendedSupport":  false
+                           }
+              },
+    "backup_marker":  {
+                          "mtime_utc":  "2026-11-13T13:47:41.538889+00:00",
+                          "age_hours":  162.2161854379707
+                      },
+    "verification":  {
+                         "linux_unit_tests_passed":  9,
+                         "linux_unit_tests_failed":  0,
+                         "linux_test_environment":  "Temporary directory on VM; Docker mocked; no live service changes",
+                         "github_main":  "3e42a647bb96d4da3990e79662ce16d5b01fcca1",
+                         "github_ci":  "success",
+                         "github_ci_url":  "https://github.com/Maxime-00/StudentCloud/actions/runs/44613736340"
+                     }
+}

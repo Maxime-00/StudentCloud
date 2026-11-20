@@ -13,7 +13,7 @@ configuratie**, plus een **geteste** restore (verplicht voor de acceptatietest).
 | Database (metadata) | MariaDB-container `nc-db`, database uit `MARIADB_DATABASE` | `mariadb-dump` |
 | Configuratie | Docker-volume `docker_nc-html` via `/var/www/html`, inclusief `config/config.php`, apps en themes | Archief vanuit `nc-app`, met de afzonderlijke datamount uitgesloten |
 | Certificaten / SSL | reverse-proxy (cert-manager / Let's Encrypt) | Bestandscopie |
-| App-instellingen | Geïnstalleerde apps (`antivirus`, `twofactor_totp`, `groupfolders`) + config | In `config.php` / `apps/` |
+| App-instellingen | Geïnstalleerde apps (`antivirus`, `groupfolders`) + config | In `config.php` / `apps/` |
 
 ### Wanneer en waar
 

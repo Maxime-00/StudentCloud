@@ -10,7 +10,7 @@ De opdracht vraagt om een veilige interne filesharingdienst voor studenten en
 projectgroepen. De belangrijkste eisen voor de platformkeuze zijn:
 
 - een ondersteund, open-source filesharingplatform;
-- persoonlijke accounts en MFA voor beheerders;
+- persoonlijke accounts;
 - de rollen gebruiker, groepsbeheerder, supportoperator en platformbeheerder;
 - gescheiden persoonlijke opslag en groepsmappen;
 - quota per gebruiker en groep, met waarschuwing bij bijna volle opslag;
@@ -47,7 +47,7 @@ klein studententeam.
 | 4 | Persoonlijke en groepsopslag | Is er een aantoonbare scheiding tussen beide? |
 | 5 | Quota | Zijn limieten per gebruiker en groep mogelijk? |
 | 6 | Delen | Zijn interne en tijdelijke beveiligde externe links mogelijk? |
-| 7 | MFA en authenticatie | Is MFA, minimaal voor beheerders, beschikbaar? |
+| 7 | Authenticatie | Kunnen gebruikers veilig met hun persoonlijke account aanmelden? |
 | 8 | Malware en uploads | Zijn uploadlimieten en antivirusintegratie mogelijk? |
 | 9 | Back-up en herstel | Kunnen data, database en configuratie worden hersteld? |
 | 10 | Docker-installatie | Is er een onderhoudbare containerinstallatie? |
@@ -59,7 +59,7 @@ klein studententeam.
 ### 3.1 Nextcloud
 
 Nextcloud combineert bestandsopslag, gebruikers- en groepsbeheer, versiebeheer,
-prullenbak, gedeelde mappen en een groot app-ecosysteem voor onder andere MFA,
+prullenbak, gedeelde mappen en een groot app-ecosysteem voor onder andere
 SSO, antivirus, quota en monitoring.
 
 - **Sterk:** volwassen ecosysteem, uitgebreide documentatie en ondersteuning
@@ -73,7 +73,7 @@ Seafile richt zich sterk op bestandssynchronisatie en gebruikt libraries voor
 opslag en rechten.
 
 - **Sterk:** efficiënte synchronisatie en duidelijke library-permissies.
-- **Aandachtspunt:** verschillende functies voor MFA, SSO en beheer zitten in
+- **Aandachtspunt:** verschillende functies voor SSO en beheer zitten in
   de Enterprise-editie. Groepsquota en malwarescans vragen meer integratiewerk.
 
 ### 3.3 ownCloud
@@ -98,7 +98,6 @@ in een commerciële editie.
 | Persoonlijke en groepsopslag | ✅ home en Group folders | ✅ libraries | ✅ homes en shares |
 | Quota per gebruiker en groep | ✅ | ⚠️ groepsquota beperkt | ⚠️ groepsquota beperkt |
 | Beveiligde links met vervaldatum | ✅ | ⚠️ afhankelijk van editie | ✅ |
-| MFA | ✅ TOTP-app | ⚠️ Enterprise | ⚠️ externe integratie |
 | Malware- en uploadcontrole | ✅ antivirus-app en limieten | ⚠️ externe integratie | ⚠️ externe integratie |
 | Back-up en herstel | ✅ data, database en configuratie | ✅ | ✅ |
 | Docker-installatie | ✅ officiële images en Compose | ✅ | ✅ |
@@ -130,7 +129,7 @@ Compose kan draaien.
    Nextcloud-configuratie kunnen afzonderlijk worden geback-upt en hersteld.
 5. **Beheerbaarheid.** Officiële container-images maken de installatie met
    Docker Compose reproduceerbaar op de VM `studentencloud`.
-6. **Uitbreidbaarheid.** MFA, SSO, Group folders, antivirus en monitoring
+6. **Uitbreidbaarheid.** SSO, Group folders, antivirus en monitoring
    kunnen gericht als apps worden toegevoegd zonder alle functies te activeren.
 
 De huidige testomgeving gebruikt Ubuntu Server 24.04 op VM `studentencloud` en
@@ -145,8 +144,7 @@ gemonteerd op `/srv/nextcloud-data`.
 - prestaties en foutafhandeling van de ClamAV-integratie testen;
 - quota en waarschuwingen met Group folders verifiëren;
 - herstel van data, MariaDB en configuratie naar een testlocatie uitvoeren;
-- MFA voor de platformbeheerder testen;
-- publieke links, antivirus en MFA volgens het beveiligingsbeleid configureren.
+- publieke links en antivirus volgens het beveiligingsbeleid configureren.
 
 Tot deze controles zijn afgerond, is de keuze **voorlopig definitief**.
 
