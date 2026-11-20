@@ -143,6 +143,23 @@ Nog af te ronden:
 6. Houd Ransomware Protection buiten werking tot een compatibele versie in een testomgeving is gevalideerd. Leg de ontbrekende beschermingslaag vast in het beveiligingsbeleid.
 7. Controleer back-ups en aantoonbaar herstel, en werk TLS/certificaatvertrouwen af.
 
+## Vervolgincident: dubbele gebruikers bij Authentik-login
+
+De beheerder meldt dat aanmelden met hetzelfde Authentik-adminaccount op een andere computer nieuwe Nextcloud-accounts oplevert. Screenshot toont twee accounts met weergavenaam `authentik Default Admin` en hetzelfde e-mailadres, maar verschillende interne accountnamen (`e357...` en `eb2d...`), plus een account met hexwaarde als weergavenaam. Dit bewijst duplicaten, niet dat iedere login een nieuw account maakt of dat het apparaat de oorzaak is.
+
+Te onderzoeken: Authentik Subject mode (stabiele `sub` versus willekeurig), Nextcloud User ID mapping, Unique user IDs/providerprefix en meerdere of opnieuw aangemaakte providers. Eerdere wijzigingen in ID-instellingen kunnen bestaande duplicaten verklaren. Groepsprovisioning en gebruikersidentificatie zijn afzonderlijke mechanismen. Controleer huidige instellingen voordat je ze opnieuw wijzigt; verwijder geen duplicaten zonder controle van bestanden en shares. Een gelijke weergavenaam of e-mailadres is geen bewijs van dezelfde OIDC-identiteit.
+
+### Bevestigde screenshots na melding dubbele gebruikers
+
+- Authentik Subject Mode: **Based on the User's hashed ID**.
+- Authentik Include claims in id_token: **aan**.
+- Authentik Issuer mode: **Each provider has a different issuer, based on the application slug**.
+- Nextcloud Gebruikers-ID-toewijzing: **sub**.
+- Nextcloud Unieke gebruikers-ID gebruiken: **aan**.
+- Nextcloud Groepen-toewijzing: **groups**; Quota-toewijzing: **quota**.
+
+De hashmodi zijn op zichzelf geen willekeurige ID per browser of login. Een wissel van Unique user IDs, mapping of provider kan wel een andere Nextcloud-account-ID opleveren. Het eerdere advies om Unique user IDs uit te zetten kan daarom een identiteitswissel en duplicaten hebben veroorzaakt; dit is nog geen bewezen verklaring voor voortdurend nieuwe accounts. Niet opnieuw schakelen zonder te bepalen welke bestaande identiteit behouden moet blijven. Volgende controle: zonder configuratiewijzigingen twee opeenvolgende logins met exact dezelfde Authentik-gebruiker en dezelfde Nextcloud-provider uitvoeren en de accountnamen/aantallen vergelijken.
+
 ## Referenties
 
 - [Authentik: Nextcloud-integratie](https://integrations.goauthentik.io/chat-communication-collaboration/nextcloud/)

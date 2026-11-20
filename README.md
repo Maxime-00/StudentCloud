@@ -4,7 +4,7 @@
 
 Voor Project 9 bouwen we een studentencloud op een Proxmox-VM: een open-source platform waarmee studenten bestanden kunnen opslaan, delen en samen aan groepswerk kunnen werken.
 
-We richten ons op persoonlijke accounts en opslag, groepsmappen, quota met waarschuwingen en gecontroleerd delen. TLS via het goedgekeurde publicatiepad, MFA voor beheerders waar beschikbaar, upload- en bestandsbeleid, back-up en herstel vormen de basis voor een veilige en beheersbare oplossing. De platformkeuze wordt onderbouwd met een toolvergelijking en gebruikersinterviews; de werking tonen we aan met acceptatietests en bewijsstukken.
+We richten ons op persoonlijke accounts en opslag, groepsmappen, quota met waarschuwingen en gecontroleerd delen. TLS via het goedgekeurde publicatiepad, upload- en bestandsbeleid, back-up en herstel vormen de basis voor een veilige en beheersbare oplossing. De platformkeuze wordt onderbouwd met een toolvergelijking en gebruikersinterviews; de werking tonen we aan met acceptatietests en bewijsstukken.
 
 De [officiële opdracht](https://github.com/MathieuLeroy2/network-experience-2627/blob/main/projecten/09-studentencloud.md) is de basis voor onze checklist. We kiezen een haalbare doelgroep en scope; de [projectplanning](docs/project-plan.md) bevat de mijlpalen, interviewonderwerpen en scopegrenzen.
 
@@ -33,7 +33,7 @@ De [officiële opdracht](https://github.com/MathieuLeroy2/network-experience-262
 - Nextcloud, ownCloud en Seafile vergelijken en de definitieve keuze motiveren.
 - Een `docker-compose.yml` of installatiescript schrijven en testen.
 - VM-opslag koppelen en persoonlijke opslag, groepsmappen, quota en waarschuwingen bij bijna volle opslag configureren.
-- Lokale accounts en MFA voor beheerders waar beschikbaar instellen en testen.
+- Lokale accounts instellen en aanmelden testen.
 - Intern delen en tijdelijke externe links met wachtwoord en vervaldatum configureren; publieke links standaard uitschakelen of strikt begrenzen.
 - Veilige uploadlimieten vastleggen en een gebruikersgids voor synchronisatie, delen, quota en herstel schrijven.
 

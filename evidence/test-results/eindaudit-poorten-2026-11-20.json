@@ -1,0 +1,34 @@
+﻿[
+    {
+        "port":  22,
+        "reachable":  true
+    },
+    {
+        "port":  443,
+        "reachable":  true
+    },
+    {
+        "port":  8080,
+        "reachable":  false
+    },
+    {
+        "port":  8089,
+        "reachable":  true
+    },
+    {
+        "port":  9000,
+        "reachable":  true
+    },
+    {
+        "port":  9443,
+        "reachable":  true
+    },
+    {
+        "port":  3306,
+        "reachable":  false
+    },
+    {
+        "port":  9090,
+        "reachable":  false
+    }
+]

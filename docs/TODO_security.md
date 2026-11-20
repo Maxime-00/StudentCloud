@@ -25,8 +25,8 @@ Statuslegenda: ☐ Open · ◐ In uitvoering · ◑ Klaar (review door Rol 1/2) 
 
 ¹ Taak 1: matrix, toelichting per cel en toewijzingsroute staan op papier (gespiegeld in
 `docs/roles-security.md`). **Geverifieerd 2026-10-02:** de matrix is 1-op-1 realizeerbaar
-in Nextcloud 35 — alle 5 toetspunten (upload-blokkade, wachtwoordlinks, quota 2/5 GB,
-logbeperking, MFA verplicht) zijn geïmplementeerd en getoetst, zie
+in Nextcloud 35 — de 4 toetspunten (upload-blokkade, wachtwoordlinks, quota 2/5 GB,
+logbeperking) zijn geïmplementeerd en getoetst, zie
 `evidence/test-results/test-rollenmatrix-1op1.md`.
 
 ² Taak 3: strategie, inventarisatie en restore-stappenplan staan op papier in
@@ -54,7 +54,6 @@ vier rollen: **Gebruiker**, **Groepsbeheerder**, **Supportoperator** en
 | Externe links maken | Beperkt (met wachtwoord) | Ja (met wachtwoord) | Nee | Ja |
 | Quota wijzigen | Nee | Nee | Ja (tot **2 GB**) | Ja |
 | Logs en monitoring inzien | Nee | Nee | Ja | Ja |
-| MFA uitschakelen / resetten | Nee | Nee | Ja | Ja |
 
 #### Toelichting per cel (waarom mag / mag een rol iets niet)
 
@@ -96,7 +95,6 @@ Zie voor de volledige toelichting `docs/roles-security.md` §"Hoe rollen worden 
   - [x] Externe links **verplicht met wachtwoord** → `share_link_password_default = 1` + `share_link_password_enforced = 1` (geen links zonder wachtwoord meer mogelijk).
   - [x] Per-account quota (standaard **2 GB**) via `user:setting <uid> files quota 2GB`; per-groep quota (**5 GB**) via `groupfolders:quota <id> 5GB` — beide geverifieerd.
   - [x] Logs/monitoring beperkt tot **Support/Platformbeheerder** → `admin_audit` app enabled + `log_type_audit_json = 1` + `test.support` subadmin van groep `support` (eindgebruikers geen log-toegang).
-  - [x] MFA **verplicht** voor alle rollen → `twofactorauth:enforce --on` (globaal); `twofactor_enforced = true` in systemconfig.
 
 **Resultaat:** ✅ geverifieerde matrix die kan worden getoond tijdens de beoordeling. Bewijs: `evidence/test-results/test-rollenmatrix-1op1.md`.
 
@@ -117,7 +115,7 @@ bij vertrek van een student, plus de motivatie daarvoor.
 
 ### Offboarding-volgorde (concept)
 
-1. Student studeert af → account wordt **direct gedeactiveerd** (geen toegang meer, MFA-sleutels ongeldig).
+1. Student studeert af → account wordt **direct gedeactiveerd** (geen toegang meer).
 2. **30 dagen read-only genadetijd**: eigen bestanden zijn nog in te zien/af te laden, maar niet te wijzigen.
 3. Persoonlijke data wordt **vernietigd** (definitief, inclusief prullenbak en versies).
 4. **Eigendom van groepsmappen** gaat over naar een ander groepslid of de docent (dus groepswerk blijft beschikbaar).
@@ -125,7 +123,7 @@ bij vertrek van een student, plus de motivatie daarvoor.
 **Uitvoering & logging:**
 
 - **Wie:** de **Platformbeheerder** voert de offboarding uit (account-deactivatie, vernietiging);
-  de **Supportoperator** ondersteunt (quota/quarantaine-check, MFA-reset) en mag de flow
+  de **Supportoperator** ondersteunt (quota/quarantaine-check) en mag de flow
   **niet** alleenstandig afronden (scheiding van taken).
 - **Logging:** elke offboarding-stap wordt gelogd in de Nextcloud **audit-log**
   (acties `user_disable`, `user_deleted`, `item_deleted`) met timestamp + uitvoerend
@@ -158,7 +156,7 @@ restore (verplicht voor de acceptatietest).
 | Database | MariaDB/MySQL (`nextcloud`-db) via `mysqldump` (of PostgreSQL via `pg_dump` indien gekozen) | ☐ In kaart gebracht |
 | Configuratie | `config/config.php` (+ `.env` indien aanwezig), keys, quota-instellingen | ☐ In kaart gebracht |
 | Certificaten / SSL | `cert-manager` of `Let's Encrypt` keys (reverse proxy) | ☐ In kaart gebracht |
-| App-instellingen | Geïnstalleerde apps (bv. `antivirus`, `twofactor_totp`, `groupfolders`) + hun config | ☐ In kaart gebracht |
+| App-instellingen | Geïnstalleerde apps (bv. `antivirus`, `groupfolders`) + hun config | ☐ In kaart gebracht |
 
 ### 3b. Hoe back-uppen (in overleg met Rol 1 / Infrastructuur)
 

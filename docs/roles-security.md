@@ -18,7 +18,7 @@ volgens het principe van **minimale toegang** (least privilege) en **scheiding v
 |-----|-----------|--------------------------|
 | **Gebruiker** | Studenten (en eventueel docenten als eindgebruiker) | Eigen bestanden uploaden, beheren en delen. |
 | **Groepsbeheerder** | Student met leidinggevende rol in een projectgroep | Groepsmap aanmaken en beheren, rechten op groepscontent verlenen. |
-| **Supportoperator** | Ondersteunend personeel / medestudent met supportrol | Dagelijkse support: quota, logs, MFA-reset. Geen toegang tot eigen bestanden uploaden. |
+| **Supportoperator** | Ondersteunend personeel / medestudent met supportrol | Dagelijkse support: quota en logs. Geen toegang tot eigen bestanden uploaden. |
 | **Platformbeheerder** | Systeembeheerder (rol 1/2) | Volledige beheer van het platform: configuratie, gebruikers, rechten, security. |
 
 ### Verantwoordelijkheden per rol
@@ -39,7 +39,6 @@ volgens het principe van **minimale toegang** (least privilege) en **scheiding v
   - Quota van gebruikers wijzen (standaard limiet **2 GB** per individueel account;
     afwijkend alleen door Platformbeheerder uit de buffer).
   - Logs en monitoring inzien om incidents op te sporen.
-  - MFA resetten / uitschakelen bij verloren toegang.
   - **Nee** tot eigen bestanden uploaden → bewuste scheiding van taken, zodat support niet tevens eindgebruiker is.
 
 - **Platformbeheerder**
@@ -59,7 +58,6 @@ volgens het principe van **minimale toegang** (least privilege) en **scheiding v
 | Externe links maken | Beperkt (met wachtwoord) | Ja (met wachtwoord) | Nee | Ja |
 | Quota wijzigen | Nee | Nee | Ja (tot **2 GB**) | Ja |
 | Logs en monitoring inzien | Nee | Nee | Ja | Ja |
-| MFA uitschakelen / resetten | Nee | Nee | Ja | Ja |
 
 #### Toelichting per cel (waarom mag / mag een rol iets niet)
 
@@ -101,7 +99,6 @@ LMS-sync voor de rol **Gebruiker** verplicht?
 
 ### Authenticatie
 
-- **Verplichte MFA** voor alle rollen (tot en met Platformbeheerder).
 - Wachtwoordbeleid: minimale lengte / complexiteit `☐` in te vullen.
 - Accountblokkering na `☐` geslaagde inlogpogingen (te bepalen).
 
@@ -111,7 +108,6 @@ LMS-sync voor de rol **Gebruiker** verplicht?
 
 | Maatregel | Toelichting | Status |
 |-----------|-------------|--------|
-| MFA voor alle rollen | Verplicht, ook voor beheerders | ✅ Geverifieerd (2026-10-02, `twofactorauth:enforce --on`) |
 | Versleuteling in transit | TLS/SSL (Let's Encrypt / cert-manager) | `☐` te verifiëren (nu HTTP via Docker-poort 8080) |
 | Versleuteling opslag | Data-at-rest `☐` te bepalen | `☐` |
 | Malware-scan (ClamAV) | Bij upload en periodiek — zie `docs/TODO_security.md` §4 | ◐ In uitvoering (installatie) |

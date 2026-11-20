@@ -51,23 +51,6 @@ daarom bij het eerste bezoek een waarschuwing voor onbekende uitgever.
   - Het certificaat wordt jaarlijks vernieuwd; de nieuwe versie moet dan
     opnieuw worden geïmporteerd.
 
-### Tweestapsverificatie (MFA)
-
-Beheerders moeten MFA (TOTP) gebruiken. Een account kan ook voor andere
-gebruikers MFA krijgen; de Supportoperator of Platformbeheerder schakelt die
-dan per account in.
-
-1. Meld je aan en open *Profiel* (rechtsboven) → **Beveiliging**.
-2. Onder **Tweestapsverificatie** kies je **Instellen** en scant de QR-code
-   met een authenticator-app (Google Authenticator, Authy, of een
-   systeemapp die TOTP ondersteunt).
-3. Controleer het scherm met de **herstelcodes**: bewaar die op een veilige
-   plek (bijv. passwordmanager). Een herstelcode is je ingang als je je
-   telefoon kwijt bent — niet in deze repository of als plat bestand
-   bewaren.
-4. Na de volgende inlogging wordt naast het wachtwoord om de 6-cijferige
-   code gevraagd.
-
 ## 2. Bestanden uploaden, downloaden en organiseren
 
 - **Uploaden:** *Bestanden* → **Bestanden uploaden** (of slepen naar de map
@@ -152,8 +135,7 @@ zijn, bijvoorbeeld tijdens het studeren.
 ### Desktop (Windows / macOS / Linux)
 
 1. Download de **Nextcloud Desktop Client** van de officiële Nextcloud-site.
-2. Verbind de client met `https://10.20.254.141` en log in met je cloudaccount
-   (incl. MFA-code).
+2. Verbind de client met `https://10.20.254.141` en log in met je cloudaccount.
 3. Kies welke mappen je wilt synchroniseren (standaard: alle mappen).
 4. Accepteer eventueel het interne certificaat (zie [hoofdstuk 1](#1-aanmelden));
    de client accepteert het zelfondertekende certificaat zodra het in de
@@ -194,12 +176,11 @@ van gaat maken.
 
 | Probleem | Wat je zelf kunt doen | Anders |
 |---|---|---|
-| Inlog lukt niet | Wachtwoord opnieuw opvragen; MFA-code controleren | Contact met de **Supportoperator** |
-| MFA-app is weg | Inloggen met een **herstelcode** | Supportoperator |
+| Inlog lukt niet | Gebruikersnaam controleren en wachtwoord opnieuw opvragen | Contact met de **Supportoperator** |
 | Upload faalt | Bestandsgrootte < 2 GB controleren; verbinding | Supportoperator / Platformbeheerder |
 | Buiten je quota | Bestanden verwijderen of naar de groepsmap verplaatsen | Supportoperator (quota tot 2 GB) / Platformbeheerder |
 | Certificaatwaarschuwing | Certificaat importeren in truststore (hoofdstuk 1) | — |
 
-De Supportoperator kijkt mee met quota, logboeken en MFA-reset, maar opent
+De Supportoperator kijkt mee met quota en logboeken, maar opent
 niet je bestanden. Technische platformaangelegenheden (server, backup,
 rollen) regelt de **Platformbeheerder**.
