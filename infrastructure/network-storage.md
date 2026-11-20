@@ -11,13 +11,12 @@ staan in [`docker/docker-compose.yml`](docker/docker-compose.yml).
 | VM | `studentencloud` |
 | Besturingssysteem | Ubuntu Server 24.04 |
 | IP-adres | `10.20.254.141` |
-| Tijdelijke Nextcloud-testpoort | `8080` |
+| Nextcloud via Nginx | HTTPS `443`; HTTP `80` verwijst door |
 | Dataschijf | 200 GB, gemount op `/srv/nextcloud-data` |
 | Uitvoering | Docker Compose |
 
-Nextcloud is tijdens het testen bereikbaar via
-`http://10.20.254.141:8080`. De definitieve reverse-proxy- en TLS-configuratie
-moet nog worden vastgelegd.
+Nextcloud is bereikbaar via `https://10.20.254.141`.
+Nginx verzorgt TLS; de app is op de host alleen bereikbaar via `127.0.0.1:8080`.
 
 ## Netwerkconfiguratie
 
@@ -34,7 +33,7 @@ Alleen `nc-app` publiceert een hostpoort:
 
 ```yaml
 ports:
-  - "${HTTP_PORT:-8080}:80"
+  - "127.0.0.1:${HTTP_PORT:-8080}:80"
 ```
 
 MariaDB en Redis hebben geen `ports`-configuratie en zijn daardoor niet direct
@@ -43,13 +42,14 @@ interne servicenamen `db` en `redis`.
 
 | Verbinding | Van | Naar | Poort | Bereikbaarheid |
 |---|---|---|---|---|
-| Nextcloud-testverkeer | client | `10.20.254.141` | `8080` | intern testnetwerk |
+| Nextcloud-gebruik | client | Nginx op `10.20.254.141` | `443` | schoolnetwerk |
+| Nginx naar Nextcloud | Nginx | `127.0.0.1` | `8080` | alleen de VM-host |
 | Nextcloud naar MariaDB | `nc-app` | `nc-db` | `3306` | alleen `nc-internal` |
 | Nextcloud naar Redis | `nc-app` | `nc-redis` | `6379` | alleen `nc-internal` |
 | Cron naar Nextcloud-data | `nc-cron` | gedeelde volumes | niet van toepassing | alleen op de Docker-host |
 
-Voor productie hoort een reverse proxy TLS af te handelen. MariaDB, Redis en
-beheerpoorten blijven daarbij intern en worden niet gepubliceerd.
+Nginx handelt TLS af. MariaDB en Redis blijven intern. De afzonderlijke
+Authentik- en demopoorten staan beschreven in de [architectuur](../docs/architecture.md).
 
 ## Opslag
 
@@ -119,7 +119,7 @@ docker compose ps
 docker compose exec app getent hosts db redis
 ```
 
-- Controleer dat Nextcloud op `10.20.254.141:8080` bereikbaar is.
+- Controleer dat Nextcloud via `https://10.20.254.141` bereikbaar is.
 - Controleer dat `nc-app` de interne namen `db` en `redis` kan vinden.
 - Controleer dat poorten 3306 en 6379 niet op de VM-host zijn gepubliceerd.
 - Controleer bij productie dat alleen de reverse proxy extern bereikbaar is.
@@ -134,5 +134,5 @@ df -h /srv/nextcloud-data
 - Upload een testbestand en herstart de containers met
   `docker compose restart`; het bestand moet aanwezig blijven.
 - Herstart de VM en controleer dat `/srv/nextcloud-data` automatisch mount.
-- Voer een hersteltest uit voor gebruikersdata, MariaDB en configuratie zoals
-  beschreven in [`../docs/backup-restore.md`](../docs/backup-restore.md).
+- De herstelprocedure voor gebruikersdata, MariaDB en configuratie staat in
+  [back-up en herstel](../docs/backup-restore.md).

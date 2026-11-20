@@ -1,3 +1,5 @@
+> **Archief:** dit document is historisch naslagwerk. Oude taken, testverplichtingen en statussen zijn geen actuele oplevervoorwaarden. Gebruik het [projectoverzicht](../../PROJECT_CHECKLIST.md) voor de huidige afspraken.
+
 # Branchanalyse - Project 9
 
 **Synchronisatie na analyse:** de vijf ontbrekende commits uit `origin/main` zijn op 2026-10-02 zonder inhoudelijke mergeconflicten in lokale `main` samengevoegd. De lokale documentatiecommits zijn behouden. Na publicatie van de resulterende mergecommit is `main` gelijk aan `origin/main`.
@@ -56,13 +58,13 @@ Basis: `git fetch origin --prune`, alle lokale en remote branches, `origin/main`
 - Voor **M06** beschrijft het configuratie-testplan wel zichtbare opslagfeedback, maar zegt zelf dat automatische waarschuwing bij een instelbaar bijna-vol-percentage nog moet worden beslist. De Must-waarschuwing is dus niet aangetoond.
 - Voor **M12/M16** noemt het beleid onmiddellijke deactivatie gevolgd door 30 dagen read-only toegang. Bepaal hoe die read-only toegang werkt zonder het gedeactiveerde account te heractiveren.
 
-De volledige bewijs- en statuskoppeling staat in [PROJECT_CHECKLIST.md](../PROJECT_CHECKLIST.md). De rest van dit document hieronder is de eerdere momentopname en moet niet als actuele branchstand worden gelezen.
+De volledige bewijs- en statuskoppeling staat in [PROJECT_CHECKLIST.md](../../PROJECT_CHECKLIST.md). De rest van dit document hieronder is de eerdere momentopname en moet niet als actuele branchstand worden gelezen.
 
 ---
 
 **Datum:** 2026-10-02. **Basis:** opgehaalde origin-branches na `git fetch origin --prune`.
 
-Deze historische analyse is gebaseerd op Git-inhoud, zonder deployment of acceptatietests uit te voeren. De opdrachttekst was tijdens die analyse nog niet beschikbaar; de checklist is daarna afgestemd op de officiële opdracht. Informatie over PR's was niet beschikbaar. De requirement-ID's verwijzen naar [PROJECT_CHECKLIST.md](../PROJECT_CHECKLIST.md). Onderstaande tabellen beschrijven de oorspronkelijke momentopname en zijn geen nieuwe analyse van implementatievoortgang.
+Deze historische analyse is gebaseerd op Git-inhoud, zonder deployment of acceptatietests uit te voeren. De opdrachttekst was tijdens die analyse nog niet beschikbaar; de checklist is daarna afgestemd op de officiële opdracht. Informatie over PR's was niet beschikbaar. De requirement-ID's verwijzen naar [PROJECT_CHECKLIST.md](../../PROJECT_CHECKLIST.md). Onderstaande tabellen beschrijven de oorspronkelijke momentopname en zijn geen nieuwe analyse van implementatievoortgang.
 
 ## Branches en commits
 

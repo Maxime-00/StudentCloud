@@ -1,3 +1,5 @@
+> **Archief:** dit document is historisch naslagwerk. Oude taken, testverplichtingen en statussen zijn geen actuele oplevervoorwaarden. Gebruik het [projectoverzicht](../../PROJECT_CHECKLIST.md) voor de huidige afspraken.
+
 # Stap 4 — Authenticatie en accountbeheer testen
 
 Dit document beschrijft **hoe** we, zodra Nextcloud op de VM draait, de

@@ -8,9 +8,9 @@ Compose. De containerconfiguratie staat in `infrastructure/docker/`:
 - `.env.example` is het sjabloon voor configuratiewaarden en geheimen;
 - `.env` bevat de echte lokale waarden en wordt niet gecommit.
 
-> **Status:** testomgeving op Ubuntu Server 24.04. Nginx publiceert Nextcloud
-> via HTTP op poort 80; de container zelf luistert alleen op
-> `127.0.0.1:8080`. TLS is nog niet geconfigureerd.
+> **Huidige toegang:** `https://10.20.254.141` via Nginx met een intern certificaat.
+> HTTP verwijst door naar HTTPS; de container luistert alleen op `127.0.0.1:8080`.
+> De basisinstallatie hieronder wordt gevolgd door de TLS-inrichting verderop.
 
 ## Huidige infrastructuur
 
@@ -24,7 +24,7 @@ Compose. De containerconfiguratie staat in `infrastructure/docker/`:
 | Database | `mariadb:11.8` |
 | Cache en file locking | `redis:7-alpine` |
 | Achtergrondtaken | aparte `nc-cron`-container |
-| Test-URL via Nginx | `http://10.20.254.141` |
+| Gebruikers-URL via Nginx | `https://10.20.254.141` |
 | Lokale containerbinding | `127.0.0.1:8080` |
 | Dataschijf | 200 GB, gemount op `/srv/nextcloud-data` |
 | Nextcloud-datamap | `/srv/nextcloud-data/data` |

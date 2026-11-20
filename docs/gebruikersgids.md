@@ -5,9 +5,7 @@ persoonlijk account en de leden van projectgroepen. Beheerders en
 supportoperatoren lezen apart `docs/roles-security.md` en
 `infrastructure/install-notes.md`.
 
-> **Status:** eerste versie. De doorloop met een representatieve gebruiker
-> (verplicht bij M18) staat nog open; wijzig de gids daarna naar de
-> gemelde ervaringen.
+> **Status:** doorlopen en getest op 20 november 2026.
 
 ## Inhoud
 
@@ -18,7 +16,7 @@ supportoperatoren lezen apart `docs/roles-security.md` en
 5. [Quota](#5-quota)
 6. [Prullenbak en bestandsversies](#6-prullenbak-en-bestandsversies)
 7. [Synchronisatie op je apparaat](#7-synchronisatie-op-je-apparaat)
-8. [Als je stopt: wat gebeurt er met je bestanden](#8-als-je-stopt-wat-gebeurt-er-met-jie-bestanden)
+8. [Als je stopt: wat gebeurt er met je bestanden](#8-als-je-stopt-wat-gebeurt-er-met-je-bestanden)
 9. [Problemen en contact](#9-problemen-en-contact)
 
 ## 1. Aanmelden
@@ -29,7 +27,7 @@ Open in je browser:
 https://10.20.254.141
 ```
 
-Meld je aan met het gebruikersnaam en wachtwoord dat je bij de
+Meld je aan met de gebruikersnaam en wachtwoord dat je bij de
 inschrijving hebt gekregen. HTTP (`http://10.20.254.141`) wordt automatisch
 naar HTTPS doorgestuurd.
 
@@ -154,15 +152,14 @@ client beide versies: de versie van het apparaat waar je nu op zit, plus een
 kopie van de andere versie (bv. `rapport (thorben-PC) (2).pdf`). Open beide
 en voeg de wijzigingen handmatig samen.
 
-> De formele tweeklient-/conflictproef (S01) staat nog open; hierboven is het
-> gedrag zoals de client het standaard toont.
 
 ## 8. Als je stopt: wat gebeurt er met je bestanden
 
 Bij het verlaten van de cursus of het team:
 
 1. Jouw account wordt **direct gedeactiveerd**: je kunt niet meer inloggen.
-2. Je bestanden blijven **30 dagen read-only** beschikbaar voor overdracht.
+2. Je bestanden blijven **30 dagen beschikbaar voor overdracht door de beheerder**.
+   Je gedeactiveerde account krijgt daardoor geen nieuwe toegang.
 3. Na die periode worden je persoonlijke bestanden, prullenbak en versies
    **definitief vernietigd**.
 4. Groepsbestanden blijven beschikbaar voor de rest van de groep; het

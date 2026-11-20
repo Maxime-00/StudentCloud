@@ -1,3 +1,5 @@
+> **Archief:** dit document is historisch naslagwerk. Oude taken, testverplichtingen en statussen zijn geen actuele oplevervoorwaarden. Gebruik het [projectoverzicht](../../PROJECT_CHECKLIST.md) voor de huidige afspraken.
+
 # Stap 3 — Quota's en groepsmappen testen
 
 Dit document beschrijft **hoe** we, zodra Nextcloud op de VM draait, de

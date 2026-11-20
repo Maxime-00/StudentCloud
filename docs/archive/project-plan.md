@@ -1,3 +1,5 @@
+> **Archief:** dit document is historisch naslagwerk. Oude taken, testverplichtingen en statussen zijn geen actuele oplevervoorwaarden. Gebruik het [projectoverzicht](../../PROJECT_CHECKLIST.md) voor de huidige afspraken.
+
 # Projectplanning, doelgroep en scope
 
 Gebaseerd op de [officiële opdracht](https://github.com/MathieuLeroy2/network-experience-2627/blob/main/projecten/09-studentencloud.md), gecontroleerd op 2026-10-02. Michiel coördineert; het team levert de inhoud en testbewijzen. Dit document is een plan, geen bewijs van afgeronde interviews of mijlpalen.
@@ -46,4 +48,4 @@ Publieke externe links staan standaard uit of worden strikt begrensd volgens de 
 
 ## Oplevering en bewijs
 
-Volg de [checklist](../PROJECT_CHECKLIST.md) voor alle Musts, Shoulds, Coulds en verplichte bewijsstukken. Voer de [acceptatietests](acceptance-tests.md) uit en leg werkelijke resultaten vast. De officiële opdracht vraagt sync- en linktests als verplichte bewijsstukken, terwijl de desktop-/mobiele synchronisatieproef onder Should staat; plan het syncbewijs daarom expliciet in en stem eventuele beperking af met de docent.
+Volg de [checklist](../../PROJECT_CHECKLIST.md) voor alle Musts, Shoulds, Coulds en verplichte bewijsstukken. Voer de [acceptatietests](acceptance-tests.md) uit en leg werkelijke resultaten vast. De officiële opdracht vraagt sync- en linktests als verplichte bewijsstukken, terwijl de desktop-/mobiele synchronisatieproef onder Should staat; plan het syncbewijs daarom expliciet in en stem eventuele beperking af met de docent.

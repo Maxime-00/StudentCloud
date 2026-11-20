@@ -1,0 +1,114 @@
+﻿{
+    "checked_at_utc":  "2026-11-20T10:12:58.277130+00:00",
+    "provider_shape":  "dict",
+    "providers":  [
+                      {
+                          "id":  1,
+                          "identifier":  "authentik",
+                          "discoveryEndpoint":  "http://10.20.254.141:9000/application/o/nextcloud/.well-known/openid-configuration",
+                          "endSessionEndpoint":  null,
+                          "scope":  "openid profile email groups"
+                      }
+                  ],
+    "provider_field_names":  [
+                                 [
+                                     "id",
+                                     "identifier",
+                                     "clientId",
+                                     "discoveryEndpoint",
+                                     "endSessionEndpoint",
+                                     "postLogoutUri",
+                                     "scope",
+                                     "clientSecret",
+                                     "settings"
+                                 ]
+                             ],
+    "apps":  {
+                 "office":  {
+                                "id":  "office",
+                                "name":  "Office",
+                                "summary":  "Office overview",
+                                "version":  "1.1.0",
+                                "website":  null
+                            },
+                 "text":  {
+                              "id":  "text",
+                              "name":  "Text",
+                              "summary":  "📝 Collaborative document editing",
+                              "version":  "9.0.0",
+                              "website":  "https://github.com/nextcloud/text"
+                          },
+                 "sharing":  {
+                                 "id":  "sharing",
+                                 "name":  "Sharing",
+                                 "summary":  "TODO",
+                                 "version":  "1.0.4",
+                                 "website":  null
+                             },
+                 "encryption":  {
+                                    "id":  "encryption",
+                                    "name":  "Default Encryption Module",
+                                    "summary":  "Default encryption module for Nextcloud Server-side Encryption (SSE)",
+                                    "version":  "3.0.0-dev.0",
+                                    "website":  null
+                                }
+             },
+    "encryption_status":  "- enabled: false\n  - defaultModule:",
+    "login_route":  [
+                        {
+                            "host":  "10.20.254.141",
+                            "path":  "/index.php/login",
+                            "status":  302
+                        },
+                        {
+                            "host":  "10.20.254.141",
+                            "path":  "/apps/user_oidc/login/1",
+                            "status":  303
+                        },
+                        {
+                            "host":  "10.20.254.141:9000",
+                            "path":  "/application/o/authorize/",
+                            "status":  302,
+                            "redirect_uri":  [
+                                                 "https://10.20.254.141/apps/user_oidc/code"
+                                             ],
+                            "scope":  [
+                                          "openid profile email groups"
+                                      ]
+                        },
+                        {
+                            "host":  "10.20.254.141:9000",
+                            "path":  "/if/flow/default-authentication-flow/",
+                            "status":  200,
+                            "redirect_uri":  [
+                                                 "https://10.20.254.141/apps/user_oidc/code"
+                                             ],
+                            "scope":  [
+                                          "openid profile email groups"
+                                      ],
+                            "looks_like_login":  true
+                        }
+                    ],
+    "account_backends":  {
+                             "user_oidc":  5,
+                             "Database":  1,
+                             "total":  6
+                         },
+    "selected_enabled_apps":  {
+                                  "user_oidc":  "8.11.0",
+                                  "office":  "1.1.0",
+                                  "text":  "9.0.0",
+                                  "groupfolders":  "23.0.1"
+                              },
+    "absent_apps":  [
+                        "guests",
+                        "richdocuments",
+                        "onlyoffice"
+                    ],
+    "limitations":  [
+                        "No authenticated end-to-end login or logout performed",
+                        "No repeated login or role persistence check performed",
+                        "S01-S04 marked present based on team statement; not re-tested in this inspection",
+                        "No dedicated group-folder request portal or guest lifecycle found in inspected project"
+                    ]
+}

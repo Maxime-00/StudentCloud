@@ -1,123 +1,52 @@
-# Backup en herstel
+# Back-up en herstel
 
-## Backupstrategie
+De back-up bevat de onderdelen die samen de Nextcloud-omgeving vormen:
 
-Platform: **Nextcloud** op een Proxmox-VM. We back-uppen **data, metadata én
-configuratie**, plus een **geteste** restore (verplicht voor de acceptatietest).
+| Onderdeel | Bron |
+|---|---|
+| Gebruikersbestanden, versies en prullenbak | `/srv/nextcloud-data/data` |
+| Accounts, rechten en bestandsmetadata | MariaDB in `nc-db` |
+| Nextcloud, apps en configuratie | Het volume van `nc-app` |
+| HTTPS-certificaten | Apart bewaren uit `/etc/nginx/ssl` |
 
-### Wat wordt geback-upt (inventarisatie)
+## Back-up maken
 
-| Component | Locatie (Nextcloud) | Methode |
-|-----------|---------------------|---------|
-| Bestanden (data) | `/srv/nextcloud-data/data` (individuele + group-folder opslag) | Bestandssnapshot/-archief; later Restic/BorgBackup |
-| Database (metadata) | MariaDB-container `nc-db`, database uit `MARIADB_DATABASE` | `mariadb-dump` |
-| Configuratie | Docker-volume `docker_nc-html` via `/var/www/html`, inclusief `config/config.php`, apps en themes | Archief vanuit `nc-app`, met de afzonderlijke datamount uitgesloten |
-| Certificaten / SSL | reverse-proxy (cert-manager / Let's Encrypt) | Bestandscopie |
-| App-instellingen | Geïnstalleerde apps (`antivirus`, `groupfolders`) + config | In `config.php` / `apps/` |
-
-### Wanneer en waar
-
-| Laag | Ritme | Doel | Retentie |
-|------|-------|------|----------|
-| **Dagelijkse VM-snapshot** (Proxmox) | Dagelijks (bv. 03:00) | Snelste volledige herstel | 7 dagen |
-| **Bestand + DB + config** (Restic/BorgBackup) | Dagelijks naar offsite | Lose bestandsherstel, versiebeheerd & versleuteld | 7 dagen + 4 weken (wekelijks) |
-| **Wekelijkse offsite** | Wekelijks naar 2e node/host | Bescherming tegen VM-uitval | 4 weken |
-
-- **Offsite-doel:** een andere node/host (zie openstaande vraag in
-  `docs/TODO_security.md` Taak 3).
-- **Beveiliging:** back-ups versleuteld (Restic/Borg of volume-crypt), alleen Rol 1/3
-  heeft back-uprechten; offsite-rechten beperkt.
-
-### Geïmplementeerd back-upscript
-
-[`../scripts/backup-nextcloud.sh`](../scripts/backup-nextcloud.sh) maakt een
-consistente back-up van de huidige Compose-stack. Het script:
-
-- vereist een expliciet, reeds bestaand doelpad;
-- weigert een doel binnen de live Nextcloud-datamap;
-- controleert de datamount en vereiste containers;
-- schakelt onderhoudsmodus tijdelijk in en herstelt de eerdere toestand;
-- maakt een gecomprimeerde MariaDB-dump;
-- archiveert het Nextcloud-volume en de afzonderlijke datamap;
-- bewaart numerieke eigenaars, ACL's en extended attributes voor data;
-- schrijft SHA-256-controlesommen en gesaneerde statusinformatie;
-- probeert het uitschakelen van onderhoudsmodus maximaal één minuut opnieuw als
-  de database tijdelijk niet bereikbaar is;
-- markeert een back-up pas als voltooid nadat onderhoudsmodus succesvol is
-  uitgeschakeld;
-- laat een onvolledige back-up herkenbaar achter met suffix `.incomplete`.
-
-Voer het script op de VM uit vanuit de repository:
+Voer vanuit de repository op de VM uit met een bestaand back-updoel:
 
 ```bash
 sudo ./scripts/backup-nextcloud.sh /pad/naar/gemount-back-updoel
 ```
 
-Gebruik voor productie een versleuteld doel buiten de StudentCloud-VM. Een
-map op dezelfde VM is alleen geschikt voor een tijdelijke technische
-restore-oefening en beschermt niet tegen VM- of schijfverlies. Het script raakt
-de Authentik-containers niet; integratie daarvan volgt na afronding van het
-Authentik-werk.
+Het [script](../scripts/backup-nextcloud.sh) maakt een databasedump en archieven,
+bewaart bestandsrechten en controleert de integriteit met SHA-256.
+Het herstelt de oorspronkelijke onderhoudstoestand. Bij een normale run wordt
+de succesmarker pas bijgewerkt nadat Nextcloud weer uit onderhoudsmodus is
+en de archiefcontroles slagen.
 
-## Herstelprocedure
+De gebruikte locatie is `/srv/nextcloud-data/backups`. De marker
+`/srv/nextcloud-data/.last-backup-marker` wordt door de [monitoring](monitoring.md) gevolgd.
+Een handmatige back-up plant geen volgende back-up; planning en bewaartermijn
+worden apart door de beheerder geregeld.
 
-Doel: een (verwijderd) bestand **incl. de rechten van die student** terugzetten.
+## Gegevens herstellen
 
-### Volledig herstel (uit snapshot)
+Een gebruiker kan een verwijderd bestand of eerdere versie herstellen via
+de [gebruikersgids](gebruikersgids.md).
 
-1. Snapshot van de Proxmox-VM uitkiezen (laatste vóór het verlies).
-2. VM rollen naar de snapshot (of een **kloon** van de snapshot starten in een
-   geïsoleerde testomgeving).
-3. Nextcloud starten, verifiëren dat `data/`, `config.php` en de DB consistent zijn.
+Bij herstel uit een back-up:
 
-### Los bestandsherstel (uit Restic/Borg)
+1. Kies een volledige, consistente back-up van vóór het gegevensverlies.
+2. Herstel eerst naar een aparte omgeving, zodat de live data behouden blijft.
+3. Zet bestanden, configuratie en de bijbehorende database terug.
+4. Controleer bestandsinhoud, eigenaar, rechten en gedeelde mappen voordat je
+   de herstelde omgeving in gebruik neemt.
 
-1. **Testbestand aanmaken:** student uploadt `restore-test.txt` + een groepsmap met
-   eigen rechten.
-2. **Bestand verwijderen** (via UI) → controleer dat het in de prullenbak/definitief
-   weg is.
-3. **Kies restore-bron:** laatst bekende back-up vóór de verwijdering
-   (snapshot of Restic/Borg).
-4. **Herstel uitvoeren** in een geïsoleerde testomgeving (niet de live VM).
-   - `restore` / `borg extract` van het bestand terug in de `data/`-structuur.
-   - Indien metadata nodig: `mysqldump`-restore van de betreffende rijen
-     (files, share).
-5. **Verifiëren:**
-   - `restore-test.txt` is terug en leesbaar.
-   - Eigenaar/rechten van de student kloppen (Nextcloud-share / `ls -l`).
-   - Metadata (groepsmap, externe link-instellingen) is herstelbaar.
-6. **Resultaat documenteren:** screenshot + timestamp → `evidence/screenshots/` en
-   `evidence/test-results/`.
+## Grenzen van de huidige back-up
 
-## Testen
+De vastgelegde back-up staat op dezelfde VM. Voor bescherming tegen VM- of
+schijfverlies is een afzonderlijke back-uplocatie nodig. Authentik wordt niet
+door dit script meegenomen. Het bestaande [back-upverslag](../evidence/test-results/M10-backup-2026-11-13.md)
+beschrijft archivering en integriteit; het rapporteert geen volledige applicatierestore.
 
-### Restore-acceptatietest
-
-- [ ] Testomgeving voor restore opzetten (bijv. tijdelijke Proxmox-VM / container).
-- [ ] Volledige restore-test draaien volgens het stappenplan hierboven.
-- [ ] Bewijsstukken verzamelen (screenshots + logs) → `evidence/`.
-
-### Periodieke herstelcontrole
-
-- [ ] Maandelijks één **simulatie**: een recent bestand uit een live back-up herstellen
-      in een sandbox en leesbaarheid verifiëren.
-- [ ] Resultaat loggen (datum, bestand, uitkomst) in `evidence/test-results/`.
-
-**Resultaat:** geteste, gedocumenteerde back-up & restore met bewijs in `evidence/`.
-
-## Monitoring of completed backups
-
-After service recovery and finalizing the archive directory, the script atomically
-updates /srv/nextcloud-data/.last-backup-marker. BACKUP_SUCCESS_MARKER can override
-that path. Its parent must already exist and be writable by the backup operator.
-A failed backup or failed maintenance-mode recovery does not refresh the marker.
-
-Before publishing success, the script also checks the gzip database stream, lists
-both tar archives without extracting them, and verifies SHA-256 checksums. These
-checks run after service recovery to keep the maintenance window shorter. Archive
-integrity is not a substitute for the separate full application restore test.
-
-The [monitoring collector](monitoring.md) exports its modification time. No marker
-means no successful backup is proven; it must never be created just to clear an alert.
-Scheduling, encrypted off-VM storage, retention and a full application restore remain
-separate acceptance requirements. Authentik is not captured by this script.
+Oude scenario's staan in het [archief](archive/README.md), niet als verplichte
+openstaande acceptatietests.

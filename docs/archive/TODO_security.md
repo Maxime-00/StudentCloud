@@ -1,3 +1,5 @@
+> **Archief:** dit document is historisch naslagwerk. Oude taken, testverplichtingen en statussen zijn geen actuele oplevervoorwaarden. Gebruik het [projectoverzicht](../../PROJECT_CHECKLIST.md) voor de huidige afspraken.
+
 # TODO — Security, Privacy & Backup (Rol 3)
 
 Dit document is het werkplan voor de **Security, Privacy & Backup Engineer**.
