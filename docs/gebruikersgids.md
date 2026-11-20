@@ -107,8 +107,7 @@ vervaldatum is de link niet meer te openen.
 | Persoonlijk account | **2 GB** |
 | Projectgroep (gedeeld) | **5 GB** |
 
-- Je gebruik ziet rechtsboven naast je naam en onder *Profiel →
-  Opslagstatus*.
+- Je opslaggebruik staat linksonder, bijvoorbeeld: "… van 2 GB gebruikt".
 - Kom je dicht bij je limiet, dan meldt de cloud dat bijna alles vol is;
   bestanden die de limiet overschrijden worden **niet** geüpupload.
 - Je kunt je eigen quota **niet** verhogen. De Supportoperator mag tot
@@ -121,7 +120,7 @@ vervaldatum is de link niet meer te openen.
   (*Bestanden* → *Prullenbak*). Vandaar kun je ze terugzetten of definitief
   wissen. Na 30 dagen zijn ze weg.
 - **Versies:** per bestand worden maximaal **10 versies** bewaard. Klik op
-  de drie puntjes naast een bestand → **Versies** om eerdere versies te
+  de drie puntjes naast een bestand → **Details** → **Versies** om eerdere versies te
   zien; kies een versie → *Herstellen*.
 - Herstel je een bestand, dan krijg je je oorspronkelijke bestandsnaam en
   locatie terug, met behoud van de rechten die er vóór het verwijderen
